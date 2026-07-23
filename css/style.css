@@ -85,15 +85,6 @@ body{
   box-shadow:0 0 6px 1px var(--ember); opacity:0; animation:emberRise linear infinite;
 }
 
-/* ---------- BANNIÈRE FINE ---------- */
-.marquee-slim{
-  position:relative; z-index:5; overflow:hidden; white-space:nowrap;
-  background:linear-gradient(90deg, var(--ember), var(--ember-2));
-  padding:5px 0;
-}
-.marquee-slim .track{ display:inline-flex; gap:28px; animation:scrollMarquee 18s linear infinite; will-change:transform; }
-.marquee-slim span{ font-family:'Inter'; font-weight:700; font-size:10.5px; letter-spacing:.05em; color:#0a0a0a; }
-
 /* ---------- HERO ---------- */
 .hero{ position:relative; height:236px; overflow:hidden; background:#0a0a0a; }
 .bg-logo{ position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 18%; opacity:.85; }
@@ -109,19 +100,15 @@ body{
 
 /* ---------- EN-TÊTE COMPACT (logo / titre / cloche) ---------- */
 .top-identity-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:20px 20px 6px; min-height:75px; box-sizing:border-box; }
-.header-menu-btn{ width:36px; height:36px; flex:0 0 auto; background:var(--card); border:1px solid var(--line); border-radius:11px; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s cubic-bezier(.16,1,.3,1), border-color .15s ease; }
-.header-menu-btn svg{ width:18px; height:18px; }
-.header-menu-btn:active{ transform:scale(.92); border-color:var(--ember); }
 .top-identity-bar .brand-mark{ width:38px; height:38px; border-radius:12px; flex:0 0 auto; }
 .top-identity-bar h1{ flex:1; text-align:center; font-family:'Sora'; font-weight:700; font-size:17px; letter-spacing:-.01em; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .top-welcome-msg{ text-align:center; color:var(--muted); font-size:12.5px; margin:6px 18px 2px; }
 .brand-mark img{width:100%; height:100%; object-fit:cover; display:block;}
 
-/* ---------- LOGO CENTRAL (remplace le titre texte, devient le déclencheur admin) ---------- */
-.header-spacer{ width:36px; height:36px; flex:0 0 auto; }
-.header-brand{ flex:1; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s ease, filter .15s ease; padding:4px 0; }
-.header-brand:active{ transform:scale(.95); }
-.header-brand img{ height:44px; width:auto; max-width:82%; object-fit:contain; filter:drop-shadow(0 0 16px rgba(255,138,0,.4)); }
+/* ---------- LOGO HEADER (sert de titre, devient le déclencheur admin) ---------- */
+.header-brand{ display:flex; align-items:center; justify-content:flex-start; cursor:pointer; transition:transform .15s ease, filter .15s ease; padding:4px 0; }
+.header-brand:active{ transform:scale(.96); }
+.header-brand img{ height:60px; width:auto; max-width:100%; object-fit:contain; filter:drop-shadow(0 0 16px rgba(255,138,0,.4)); }
 .hero-chip{ font-family:'Inter'; font-size:11px; font-weight:700; background:rgba(255,138,0,.12); border:1px solid var(--line); color:var(--ember-2); padding:6px 10px; border-radius:999px; }
 .hero-bottom{position:relative; z-index:2; padding:0 18px 18px; margin-top:56px;}
 .hero-bottom h1{ font-family:'Sora'; font-weight:800; font-size:34px; line-height:1.05; margin:0 0 8px; letter-spacing:-.02em; }
@@ -224,10 +211,10 @@ body{
 .tab.active:not([data-tab="cart"]) svg{ transform:scale(1.08); filter:drop-shadow(0 0 6px rgba(255,138,0,.5)); }
 .tab[data-tab="cart"]{ position:relative; }
 .tab[data-tab="cart"] .paw-cart-icon{
-  width:40px; height:40px; padding:18px; box-sizing:content-box; object-fit:cover;
+  width:44px; height:44px; padding:11px; box-sizing:content-box; object-fit:cover;
   background:linear-gradient(135deg,var(--ember),var(--ember-2)); border-radius:999px;
   transform:translateY(-24px);
-  box-shadow:0 10px 28px rgba(255,138,0,.55), 0 0 0 5px var(--bg), 0 0 0 7px rgba(255,138,0,.45), 0 0 34px rgba(255,138,0,.5);
+  box-shadow:0 8px 22px rgba(255,138,0,.5), 0 0 0 4px var(--bg), 0 0 0 5px rgba(255,138,0,.38), 0 0 20px rgba(255,138,0,.4);
   transition:transform .2s cubic-bezier(.16,1,.3,1);
 }
 .tab[data-tab="cart"]:active .paw-cart-icon{ transform:translateY(-24px) scale(.92); }
