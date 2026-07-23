@@ -9,8 +9,8 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v20260724b">
-<link rel="stylesheet" href="css/animations.css?v20260724b">
+<link rel="stylesheet" href="css/style.css?v20260724c">
+<link rel="stylesheet" href="css/animations.css?v20260724c">
 </head>
 <body>
 
@@ -27,7 +27,11 @@
 
 <div id="splash">
   <div class="splash-zone-top"></div>
-  <div class="splash-illustration"><img src="assets/images/logo-splash.jpg" alt="Legend Labs"></div>
+  <div class="splash-illustration">
+    <div class="splash-glow"></div>
+    <img class="splash-bear" src="assets/images/logo-splash.jpg" alt="">
+    <img class="splash-logo-overlay" src="assets/images/logo-header.png" alt="Legend Labs">
+  </div>
   <p class="splash-caption">Préparation de votre expérience...</p>
   <div class="splash-bar"><i id="splashBarFill"></i></div>
   <p class="splash-percent" id="splashPercent">0%</p>
@@ -473,6 +477,6 @@
   <div id="lightboxTrack" class="lightbox-track"></div>
 </div>
 
-<script type="module" src="js/app.js?v20260724b"></script>
+<script type="module" src="js/app.js?v20260724c"></script>
 </body>
 </html>
