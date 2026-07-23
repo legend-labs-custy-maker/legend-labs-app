@@ -3,7 +3,7 @@
 // données en HTML / DOM. Aucun appel réseau ici.
 // ============================================================
 
-import { t } from './i18n.js?v20260723';
+import { t } from './i18n.js?v20260724b';
 export function escapeHtml(str) {
   return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',

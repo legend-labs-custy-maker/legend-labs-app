@@ -3,8 +3,8 @@
 // lots dégressifs et promotions, redirection de commande.
 // ============================================================
 
-import { effectivePrice } from './products.js?v20260723';
-import { validatePromoCode } from './api.js?v20260723';
+import { effectivePrice } from './products.js?v20260724b';
+import { validatePromoCode } from './api.js?v20260724b';
 
 const CART_KEY = 'legendlabs_cart_v1';
 

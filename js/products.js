@@ -2,7 +2,7 @@
 // Chargement et calculs liés au catalogue.
 // ============================================================
 
-import { restGet, rpcIncrementLikes } from './api.js?v20260723';
+import { restGet, rpcIncrementLikes } from './api.js?v20260724b';
 
 export async function loadCategories() {
   return restGet('categories?select=*&order=sort_order.asc');

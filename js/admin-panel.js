@@ -5,15 +5,15 @@
 // Ne contient aucune logique de parcours client.
 // ============================================================
 
-import { ADMIN_TAP_TRIGGER_COUNT } from './config.js?v20260723';
-import { uploadToSignedUrl, publicMediaUrl } from './api.js?v20260723';
-import { compressImage } from './media.js?v20260723';
-import { state, tg, haptic, open, close } from './state.js?v20260723';
-import * as Admin from './admin.js?v20260723';
-import * as Cart from './cart.js?v20260723';
-import * as UI from './ui.js?v20260723';
-import * as Products from './products.js?v20260723';
-import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260723';
+import { ADMIN_TAP_TRIGGER_COUNT } from './config.js?v20260724b';
+import { uploadToSignedUrl, publicMediaUrl } from './api.js?v20260724b';
+import { compressImage } from './media.js?v20260724b';
+import { state, tg, haptic, open, close } from './state.js?v20260724b';
+import * as Admin from './admin.js?v20260724b';
+import * as Cart from './cart.js?v20260724b';
+import * as UI from './ui.js?v20260724b';
+import * as Products from './products.js?v20260724b';
+import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260724b';
 
 // ---------- Connexion (identité Telegram, aucun mot de passe) ----------
 let tapCount = 0, tapTimer = null;

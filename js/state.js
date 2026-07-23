@@ -3,7 +3,7 @@
 // communs (Telegram WebApp, retour haptique, ouverture des panneaux).
 // ============================================================
 
-import * as UI from './ui.js?v20260723';
+import * as UI from './ui.js?v20260724b';
 
 export const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor('#0A0705'); }
