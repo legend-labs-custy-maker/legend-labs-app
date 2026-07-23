@@ -335,7 +335,7 @@ export function updateMaintenanceScreen(settings) {
 }
 
 // ---------- Onglets ----------
-const VIEW_BY_TAB = { home: 'view-home', infos: 'view-infos', avis: 'view-avis', settings: 'view-settings' };
+const VIEW_BY_TAB = { accueil: 'view-accueil', home: 'view-home', infos: 'view-infos', avis: 'view-avis', settings: 'view-settings' };
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));

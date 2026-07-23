@@ -634,7 +634,11 @@ function formatBytes(bytes) {
 export function renderBannerRow(banners, onOpen) {
   const el = document.getElementById('bannerRow');
   if (!el) return;
-  el.innerHTML = banners.map(b => `<img src="${b.image_url}" data-banner="${b.id}" alt="">`).join('');
+  el.innerHTML = banners.map(b => `
+    <div class="banner-item">
+      <img src="${b.image_url}" data-banner="${b.id}" alt="">
+      ${(b.product_id || b.link_url) ? `<span class="banner-discover-btn" data-i18n="banner_discover">Découvrir</span>` : ''}
+    </div>`).join('');
   el.querySelectorAll('[data-banner]').forEach(img => {
     const banner = banners.find(b => b.id === img.dataset.banner);
     if (banner?.product_id || banner?.link_url) img.addEventListener('click', () => onOpen(banner));

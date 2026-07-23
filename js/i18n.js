@@ -8,7 +8,7 @@
 
 const DICT = {
   fr: {
-    tab_home: 'Boutique', tab_infos: 'Infos', tab_cart: 'Panier', tab_avis: 'Avis', tab_settings: 'Profil',
+    tab_home: 'Boutique', tab_accueil: 'Accueil', tab_infos: 'Infos', tab_cart: 'Panier', tab_avis: 'Avis', tab_settings: 'Profil',
     cart_label: 'Panier',
     infos_title: 'Infos', infos_sub: 'Contact, paiement, livraison et questions fréquentes.',
     contact_heading: 'Contact', payment_heading: 'Paiement', shipping_heading: 'Livraison', faq_heading: 'Questions fréquentes',
@@ -20,7 +20,7 @@ const DICT = {
     notif_center_title: 'Notifications',
     home_new_arrivals: 'Nouveautés', home_popular: 'Produits populaires', home_recent_reviews: 'Avis récents',
     similar_products: 'Produits similaires',
-    categories_heading: 'Catégories',
+    categories_heading: 'Catégories', banner_discover: 'Découvrir',
     trust_quality: 'Qualité Premium', trust_quality_sub: 'Produits sélectionnés',
     trust_shipping: 'Livraison Discrète', trust_shipping_sub: 'Rapide et sécurisée',
     trust_payment: 'Paiement Sécurisé', trust_payment_sub: 'Méthodes fiables',
@@ -41,7 +41,7 @@ const DICT = {
     no_reviews: 'Aucun avis pour le moment.',
   },
   en: {
-    tab_home: 'Shop', tab_infos: 'Info', tab_cart: 'Cart', tab_avis: 'Reviews', tab_settings: 'Profile',
+    tab_home: 'Shop', tab_accueil: 'Home', tab_infos: 'Info', tab_cart: 'Cart', tab_avis: 'Reviews', tab_settings: 'Profile',
     cart_label: 'Cart',
     infos_title: 'Info', infos_sub: 'Contact, payment, shipping and FAQ.',
     contact_heading: 'Contact', payment_heading: 'Payment', shipping_heading: 'Shipping', faq_heading: 'FAQ',
@@ -53,7 +53,7 @@ const DICT = {
     notif_center_title: 'Notifications',
     home_new_arrivals: 'New arrivals', home_popular: 'Popular products', home_recent_reviews: 'Recent reviews',
     similar_products: 'Similar products',
-    categories_heading: 'Categories',
+    categories_heading: 'Categories', banner_discover: 'Discover',
     trust_quality: 'Premium Quality', trust_quality_sub: 'Curated products',
     trust_shipping: 'Discreet Shipping', trust_shipping_sub: 'Fast and secure',
     trust_payment: 'Secure Payment', trust_payment_sub: 'Trusted methods',
