@@ -47,11 +47,6 @@ export function spawnEmbers(container, count = 22) {
   }
 }
 
-export function renderMarquee(text) {
-  document.getElementById('marqueeText').textContent = text;
-  document.getElementById('marqueeText2').textContent = text;
-}
-
 export function renderHero(settings) {
   document.title = settings.app_title || document.title;
   const splashTitle = document.getElementById('splashTitle');
@@ -518,50 +513,6 @@ export function renderAdminPromoCodes(promoCodes, onDelete) {
 }
 
 // ---------- Avis clients ----------
-export function renderReviewsSummary(summary) {
-  const el = document.getElementById('reviewsSummary');
-  if (!el) return;
-  const stars = (n) => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
-  el.innerHTML = summary.total ? `
-    <div class="review-summary-box">
-      <div class="review-avg">${summary.average}</div>
-      <div>
-        <div class="review-stars-big">${stars(summary.average)}</div>
-        <div class="review-count">${summary.total} avis</div>
-      </div>
-    </div>` : '';
-}
-
-export function renderReviewsList(reviews) {
-  const el = document.getElementById('reviewsList');
-  if (!el) return;
-  if (!reviews.length) { el.innerHTML = `<p class="pd-desc">${t('no_reviews')}</p>`; return; }
-  const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
-  el.innerHTML = reviews.map(r => `
-    <div class="review-card">
-      <div class="review-head">
-        <b>${escapeHtml(r.author_name)}</b>
-        <span class="review-stars">${stars(r.rating)}</span>
-      </div>
-      ${r.comment ? `<p class="review-comment">${escapeHtml(r.comment)}</p>` : ''}
-    </div>`).join('');
-}
-
-export function renderAdminReviews(reviews, { onToggleHidden, onDelete }) {
-  const list = document.getElementById('adminReviewsList');
-  if (!reviews.length) { list.innerHTML = `<p class="pd-desc">Aucun avis pour l'instant.</p>`; return; }
-  list.innerHTML = reviews.map(r => `
-    <div class="admin-item">
-      <span class="name">${escapeHtml(r.author_name)} — ${'★'.repeat(r.rating)}${r.is_hidden ? ' <span class="hidden-badge">masqué</span>' : ''}</span>
-      <span style="display:flex; gap:6px;">
-        <button class="del" style="background:var(--card-2); border:1px solid var(--line); color:var(--ember-2);" data-togglereview="${r.id}">${r.is_hidden ? 'Publier' : 'Masquer'}</button>
-        <button class="del" data-delreview="${r.id}">Suppr.</button>
-      </span>
-    </div>`).join('');
-  list.querySelectorAll('[data-togglereview]').forEach(b => b.addEventListener('click', () => onToggleHidden(b.dataset.togglereview)));
-  list.querySelectorAll('[data-delreview]').forEach(b => b.addEventListener('click', () => onDelete(b.dataset.delreview)));
-}
-
 // ---------- Onglet Infos (contenu texte éditable) ----------
 export function renderInfoContent(elId, text) {
   const el = document.getElementById(elId);
@@ -752,7 +703,6 @@ export function applyBranding(settings) {
 
 export function applyFeatureToggles(settings) {
   const toggle = (selector, enabled) => document.querySelectorAll(selector).forEach(el => { el.style.display = enabled ? '' : 'none'; });
-  toggle('[data-tab="avis"]', settings.feature_avis !== false);
   toggle('#notifBell', settings.feature_notifications !== false);
   toggle('.promo-box', settings.feature_promo !== false);
   // Favoris : masque juste les boutons, sans casser le reste de la carte/fiche

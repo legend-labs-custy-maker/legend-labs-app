@@ -66,7 +66,6 @@ async function openAdminPanel() {
   document.getElementById('adminWho').textContent = `Connecté : ${Admin.currentAdminName() || 'admin'}`;
   document.getElementById('adminTitle').value = state.settings.app_title || '';
   document.getElementById('adminWelcome').value = state.settings.welcome_message || '';
-  document.getElementById('adminBanner').value = state.settings.banner_message || '';
   document.getElementById('adminContact').value = state.settings.contact_link || '';
   document.getElementById('adminPaymentInfo').value = state.settings.payment_info || '';
   document.getElementById('adminShippingInfo').value = state.settings.shipping_info || '';
@@ -74,7 +73,6 @@ async function openAdminPanel() {
   document.getElementById('adminMaintenanceToggle').checked = state.settings.maintenance_enabled === true || state.settings.maintenance_enabled === 'true';
   document.getElementById('adminMaintenanceTitle').value = state.settings.maintenance_title || '';
   document.getElementById('adminMaintenanceMessage').value = state.settings.maintenance_message || '';
-  document.getElementById('featureAvis').checked = state.settings.feature_avis !== false;
   document.getElementById('featureNotif').checked = state.settings.feature_notifications !== false;
   document.getElementById('featureFavoris').checked = state.settings.feature_favoris !== false;
   document.getElementById('featurePromo').checked = state.settings.feature_promo !== false;
@@ -102,7 +100,6 @@ async function openAdminPanel() {
   UI.renderAdminProducts(state.products, state.expandedProducts);
   UI.renderAdminContactLinks(state.contactLinks, handleDeleteContactLink);
   UI.renderAdminPromoCodes(state.promoCodes, handleDeletePromoCode);
-  UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
   UI.renderAdminNotifications(state.notifications, handleDeleteNotification);
   UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
   UI.renderAdminStocks(state.products);
@@ -131,7 +128,6 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   const title = document.getElementById('adminTitle').value.trim();
   const welcome = document.getElementById('adminWelcome').value.trim();
-  const banner = document.getElementById('adminBanner').value.trim();
   const contact = document.getElementById('adminContact').value.trim();
   const paymentInfo = document.getElementById('adminPaymentInfo').value.trim();
   const shippingInfo = document.getElementById('adminShippingInfo').value.trim();
@@ -139,7 +135,6 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
   const maintenanceEnabled = document.getElementById('adminMaintenanceToggle').checked;
   const maintenanceTitle = document.getElementById('adminMaintenanceTitle').value.trim();
   const maintenanceMessage = document.getElementById('adminMaintenanceMessage').value.trim();
-  const featureAvis = document.getElementById('featureAvis').checked;
   const featureNotif = document.getElementById('featureNotif').checked;
   const featureFavoris = document.getElementById('featureFavoris').checked;
   const featurePromo = document.getElementById('featurePromo').checked;
@@ -147,7 +142,6 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
   try {
     await Admin.saveSetting('app_title', title); state.settings.app_title = title;
     await Admin.saveSetting('welcome_message', welcome); state.settings.welcome_message = welcome;
-    await Admin.saveSetting('banner_message', banner); state.settings.banner_message = banner;
     if (!contact || Cart.isSafeUrl(contact)) { await Admin.saveSetting('contact_link', contact); state.settings.contact_link = contact; }
     await Admin.saveSetting('payment_info', paymentInfo); state.settings.payment_info = paymentInfo;
     await Admin.saveSetting('shipping_info', shippingInfo); state.settings.shipping_info = shippingInfo;
@@ -155,12 +149,10 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
     await Admin.saveSetting('maintenance_enabled', maintenanceEnabled); state.settings.maintenance_enabled = maintenanceEnabled;
     await Admin.saveSetting('maintenance_title', maintenanceTitle); state.settings.maintenance_title = maintenanceTitle;
     await Admin.saveSetting('maintenance_message', maintenanceMessage); state.settings.maintenance_message = maintenanceMessage;
-    await Admin.saveSetting('feature_avis', featureAvis); state.settings.feature_avis = featureAvis;
     await Admin.saveSetting('feature_notifications', featureNotif); state.settings.feature_notifications = featureNotif;
     await Admin.saveSetting('feature_favoris', featureFavoris); state.settings.feature_favoris = featureFavoris;
     await Admin.saveSetting('feature_promo', featurePromo); state.settings.feature_promo = featurePromo;
     UI.renderHero(state.settings);
-    UI.renderMarquee(state.settings.banner_message || '');
     UI.renderInfoContent('infoPayment', state.settings.payment_info);
     UI.renderInfoContent('infoShipping', state.settings.shipping_info);
     UI.renderInfoContent('infoFaq', state.settings.faq_content);
@@ -629,55 +621,6 @@ async function handleDeletePromoCode(id) {
     UI.renderAdminPromoCodes(state.promoCodes, handleDeletePromoCode);
     haptic('medium');
   } catch { haptic('warning'); alert('Impossible de supprimer ce code.'); }
-}
-
-// ---------- Avis clients ----------
-function refreshPublicReviews() {
-  const visible = state.reviews.filter(r => !r.is_hidden);
-  UI.renderReviewsSummary(Products.reviewsSummary(visible));
-  UI.renderReviewsList(visible);
-}
-
-document.getElementById('addReviewBtn').addEventListener('click', async (e) => {
-  const btn = e.currentTarget;
-  const author_name = document.getElementById('rvName').value.trim();
-  const rating = parseInt(document.getElementById('rvRating').value, 10);
-  const comment = document.getElementById('rvComment').value.trim();
-  if (!author_name) { haptic('warning'); alert('Nom du client requis.'); return; }
-  UI.setBusy(btn, true);
-  try {
-    const res = await Admin.createReview({ author_name, rating, comment, is_hidden: false });
-    state.reviews = [res.data, ...state.reviews];
-    document.getElementById('rvName').value = '';
-    document.getElementById('rvComment').value = '';
-    UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
-    refreshPublicReviews();
-    haptic('success');
-  } catch { haptic('warning'); alert("Impossible d'ajouter cet avis."); }
-  finally { UI.setBusy(btn, false); }
-});
-
-async function handleToggleReviewHidden(id) {
-  const review = state.reviews.find(r => r.id === id);
-  if (!review) return;
-  const next = !review.is_hidden;
-  try {
-    await Admin.updateReview(id, { is_hidden: next });
-    review.is_hidden = next;
-    UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
-    refreshPublicReviews();
-    haptic('success');
-  } catch { haptic('warning'); alert("Impossible de changer la visibilité de l'avis."); }
-}
-
-async function handleDeleteReview(id) {
-  try {
-    await Admin.deleteReview(id);
-    state.reviews = state.reviews.filter(r => r.id !== id);
-    UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
-    refreshPublicReviews();
-    haptic('medium');
-  } catch { haptic('warning'); alert('Impossible de supprimer cet avis.'); }
 }
 
 // ---------- Notifications ----------

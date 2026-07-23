@@ -44,7 +44,6 @@ export async function loadEverything() {
   try {
     applyTranslations();
     UI.renderHero(settings);
-    UI.renderMarquee(settings.banner_message || '');
     UI.applyBranding(settings);
     UI.applyFeatureToggles(settings);
     UI.renderBannerRow(state.banners, (banner) => {
@@ -362,7 +361,7 @@ export function updateMaintenanceScreen(settings) {
 }
 
 // ---------- Onglets ----------
-const VIEW_BY_TAB = { accueil: 'view-accueil', home: 'view-home', infos: 'view-infos', avis: 'view-avis', settings: 'view-settings' };
+const VIEW_BY_TAB = { accueil: 'view-accueil', home: 'view-home', infos: 'view-infos', settings: 'view-settings' };
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -431,6 +430,20 @@ function computeUnreadNotifCount() {
   const lastSeen = new Date(getLastSeenNotifDate());
   return state.notifications.filter(n => new Date(n.created_at) > lastSeen).length;
 }
+document.getElementById('profileInfosLink').addEventListener('click', () => {
+  haptic('light');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-infos').classList.add('active');
+});
+document.getElementById('infosBackLink').addEventListener('click', () => {
+  haptic('light');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab[data-tab="settings"]').classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-settings').classList.add('active');
+});
+
 document.getElementById('notifBell').addEventListener('click', () => {
   open('notif');
   haptic('light');
