@@ -677,7 +677,7 @@ document.getElementById('bnFile').addEventListener('change', async (e) => {
   const productId = document.getElementById('bnProduct').value || null;
   statusEl.textContent = 'Envoi en cours...';
   try {
-    const compressed = await compressImage(file);
+    const compressed = await compressImage(file, { aspectRatio: 1.6, maxDimension: 1400 });
     const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'banners', file_name: compressed.name });
     await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
     const image_url = publicMediaUrl('product-media', uploadInfo.path);

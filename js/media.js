@@ -21,23 +21,32 @@ const JPEG_QUALITY = 0.82;    // qualité de compression (0-1)
 // options :
 //  - maxDimension : taille max en pixels (défaut 1600)
 //  - square       : true = recadre automatiquement au centre en carré parfait (icônes catégories)
+//  - aspectRatio  : ex. 1.6 = recadre automatiquement au centre à ce ratio largeur/hauteur (bannières)
 //  - preserveTransparency : true = ressort en PNG avec transparence conservée (badges produits)
-// Appel sans options = comportement historique inchangé (photos produits, bannières, logo).
+// Appel sans options = comportement historique inchangé (photos produits, logo).
 export async function compressImage(file, options = {}) {
-  const { maxDimension = MAX_DIMENSION, square = false, preserveTransparency = false } = options;
+  const { maxDimension = MAX_DIMENSION, square = false, aspectRatio = null, preserveTransparency = false } = options;
   if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
 
   try {
     const bitmap = await createImageBitmap(file);
     let { width, height } = bitmap;
     let sx = 0, sy = 0, sw = width, sh = height;
+    const targetRatio = square ? 1 : aspectRatio;
 
-    if (square) {
-      const side = Math.min(width, height);
-      sx = (width - side) / 2;
-      sy = (height - side) / 2;
-      sw = side; sh = side;
-      width = side; height = side;
+    if (targetRatio) {
+      const currentRatio = width / height;
+      if (currentRatio > targetRatio) {
+        // image trop large pour le ratio cible -> on rogne les côtés, on garde le centre
+        sw = height * targetRatio;
+        sx = (width - sw) / 2;
+        width = sw;
+      } else if (currentRatio < targetRatio) {
+        // image trop haute pour le ratio cible -> on rogne haut/bas, on garde le centre
+        sh = width / targetRatio;
+        sy = (height - sh) / 2;
+        height = sh;
+      }
     }
 
     const scale = Math.min(1, maxDimension / Math.max(width, height));

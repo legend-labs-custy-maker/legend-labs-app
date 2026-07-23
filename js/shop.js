@@ -430,12 +430,6 @@ function computeUnreadNotifCount() {
   const lastSeen = new Date(getLastSeenNotifDate());
   return state.notifications.filter(n => new Date(n.created_at) > lastSeen).length;
 }
-document.getElementById('profileInfosLink').addEventListener('click', () => {
-  haptic('light');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-infos').classList.add('active');
-});
 document.getElementById('infosBackLink').addEventListener('click', () => {
   haptic('light');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
