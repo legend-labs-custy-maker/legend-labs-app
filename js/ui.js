@@ -799,3 +799,33 @@ export function renderSimilarProducts(products, currentProduct, onOpen) {
   `;
   wireHomeCards(container, onOpen);
 }
+
+// ---------- Stocks (vue d'ensemble admin) ----------
+export function renderAdminStocks(products) {
+  const el = document.getElementById('adminStocksList');
+  if (!el) return;
+
+  const rows = [];
+  products.forEach(p => {
+    (p.variants || []).forEach(v => {
+      rows.push({ productName: p.name, variantName: v.name, unit: v.unit, stock: v.stock ?? 0 });
+    });
+  });
+
+  if (!rows.length) { el.innerHTML = `<p class="pd-desc">Aucune variante de produit pour l'instant.</p>`; return; }
+
+  const maxStock = Math.max(...rows.map(r => r.stock), 1);
+  el.innerHTML = rows.map(r => {
+    const pct = Math.round((r.stock / maxStock) * 100);
+    const status = r.stock <= 0 ? { cls: 'out', label: 'Rupture' } : r.stock <= 5 ? { cls: 'low', label: 'Faible' } : { cls: 'ok', label: 'Bon' };
+    return `
+    <div class="stock-row">
+      <div class="stock-row-head">
+        <b>${escapeHtml(r.productName)} <span style="color:var(--muted); font-weight:500;">— ${escapeHtml(r.variantName)}${r.unit ? ' ' + escapeHtml(r.unit) : ''}</span></b>
+        <span class="stock-status ${status.cls}">${status.label}</span>
+      </div>
+      <div class="stock-bar-track"><div class="stock-bar-fill ${status.cls === 'low' || status.cls === 'out' ? 'low' : ''}" style="width:${pct}%;"></div></div>
+      <div style="text-align:right; margin-top:4px;"><span class="dash-count">${r.stock} en stock</span></div>
+    </div>`;
+  }).join('');
+}

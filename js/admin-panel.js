@@ -108,6 +108,7 @@ async function openAdminPanel() {
   UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
   UI.renderAdminNotifications(state.notifications, handleDeleteNotification);
   UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
+  UI.renderAdminStocks(state.products);
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelector('.admin-tab[data-atab="dashboard"]')?.classList.add('active');
