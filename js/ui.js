@@ -689,16 +689,12 @@ export function renderAdminBanners(banners, { onToggleActive, onDelete }) {
 
 // ---------- Branding (logo, couleur) et activation des fonctionnalités ----------
 export function applyBranding(settings) {
-  const accent = settings.accent_color;
-  if (accent) {
-    document.documentElement.style.setProperty('--ember', accent);
-  }
-  const logo = settings.logo_url;
-  if (logo) {
-    document.querySelectorAll('.logo-wrap img, .header-brand img, .maintenance-logo img').forEach(img => { img.src = logo; });
-    const bgLogo = document.querySelector('.bg-logo');
-    if (bgLogo) bgLogo.style.backgroundImage = `url('${logo}')`;
-  }
+  // Fonctionnalité "logo/couleur personnalisés" retirée du panneau admin.
+  // Cette fonction ne fait plus rien : avant, elle réappliquait à chaque
+  // chargement une éventuelle ancienne valeur logo_url/accent_color encore
+  // présente en base (même sans plus aucun moyen de la modifier depuis
+  // l'admin), ce qui écrasait silencieusement le logo local par une image
+  // oubliée en base — c'est précisément le bug qu'on vient de traquer.
 }
 
 export function applyFeatureToggles(settings) {
