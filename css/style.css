@@ -262,6 +262,32 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bo
 /* ---------- ADMIN ---------- */
 .admin-tabs{ display:flex; gap:4px; background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:4px; margin-bottom:18px; flex-wrap:wrap; }
 .admin-tab{ flex:1 1 30%; padding:9px 0; border:none; border-radius:9px; background:none; color:var(--muted); font-weight:700; font-size:12.5px; cursor:pointer; }
+.admin-sidebar-header{ display:none; }
+
+/* ---------- ADMIN : PANNEAU PREMIUM RESPONSIVE (sidebar sur grand écran) ---------- */
+@media (min-width: 760px){
+  #sheetAdmin{
+    max-width:1080px; left:0; right:0; margin:32px auto; border-radius:24px;
+    display:grid; grid-template-columns:250px 1fr; align-items:start; padding:0; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px var(--line);
+  }
+  #sheetAdmin.show{ transform:none; }
+  #sheetAdmin .sheet-handle{ display:none; }
+  #sheetAdmin .sheet-close{ top:20px; right:20px; }
+  #sheetAdmin .admin-tabs{
+    grid-column:1; align-self:stretch; flex-direction:column; align-items:stretch; flex-wrap:nowrap;
+    background:linear-gradient(180deg, var(--card) 0%, var(--bg) 100%); border:none; border-right:1px solid var(--line);
+    border-radius:0; padding:24px 14px; margin:0; height:100%; overflow-y:auto; gap:4px;
+  }
+  #sheetAdmin .admin-sidebar-header{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:10px 8px 22px; margin-bottom:10px; border-bottom:1px solid var(--line); }
+  #sheetAdmin .admin-sidebar-header img{ width:52px; height:52px; border-radius:16px; margin-bottom:10px; box-shadow:0 0 22px rgba(255,138,31,.45), 0 0 0 2px rgba(255,138,31,.35); }
+  #sheetAdmin .admin-sidebar-header b{ font-family:'Bebas Neue'; letter-spacing:.05em; font-size:16px; }
+  #sheetAdmin .admin-sidebar-header span{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+  #sheetAdmin .admin-tab{ flex:none; text-align:left; padding:11px 14px; border-radius:11px; font-size:13px; transition:background .15s ease, color .15s ease; }
+  #sheetAdmin .admin-tab:hover{ background:rgba(255,138,31,.08); color:var(--text); }
+  #sheetAdmin .admin-tab.active{ background:linear-gradient(135deg,var(--ember),var(--blood)); color:#fff; box-shadow:0 4px 14px rgba(255,90,10,.3); }
+  #sheetAdmin .admin-content{ grid-column:2; padding:28px 32px; max-height:90vh; overflow-y:auto; }
+}
 
 /* ---------- LIKES ---------- */
 .like-mini{ font-size:11px; font-family:'JetBrains Mono'; color:var(--muted); cursor:pointer; padding:4px 6px; border-radius:8px; }
@@ -398,6 +424,19 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--embe
 .dash-stat span{ font-size:11px; color:var(--muted); }
 .dash-row{ display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:var(--card); border:1px solid var(--line); border-radius:10px; margin-bottom:6px; font-size:12.5px; }
 .dash-count{ font-family:'JetBrains Mono'; font-size:11px; color:var(--muted); flex:0 0 auto; margin-left:10px; }
+
+/* ---------- STOCKS (vue d'ensemble admin) ---------- */
+.stock-row{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px; }
+.stock-row-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+.stock-row-head b{ font-size:13px; }
+.stock-row-head span{ font-family:'JetBrains Mono'; font-size:11px; color:var(--muted); }
+.stock-bar-track{ height:7px; border-radius:999px; background:var(--card-2); overflow:hidden; }
+.stock-bar-fill{ height:100%; border-radius:999px; background:linear-gradient(90deg,var(--ember),var(--ember-2)); transition:width .5s ease; animation:stockBarIn .6s ease; }
+.stock-bar-fill.low{ background:linear-gradient(90deg,var(--blood),#ff6b5a); }
+.stock-status{ font-size:9.5px; font-weight:700; padding:2px 8px; border-radius:999px; }
+.stock-status.ok{ background:rgba(255,138,31,.14); color:var(--ember-2); }
+.stock-status.low{ background:rgba(179,38,30,.16); color:#ff8a7c; }
+.stock-status.out{ background:rgba(255,255,255,.08); color:var(--muted); }
 
 /* ---------- BANNIÈRES ACCUEIL ---------- */
 .banner-row{ display:flex; gap:10px; overflow-x:auto; padding:14px 16px 4px; scroll-snap-type:x mandatory; }
