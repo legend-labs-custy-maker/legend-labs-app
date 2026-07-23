@@ -89,6 +89,12 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bo
 .hero .tex{position:absolute; inset:0; z-index:1; opacity:.5; background-image:repeating-linear-gradient(115deg, rgba(255,255,255,.02) 0 2px, transparent 2px 26px);}
 .hero-top{position:relative; z-index:2; display:flex; justify-content:space-between; align-items:flex-start; padding:26px 18px 0;}
 .brand-mark{ width:52px;height:52px;border-radius:13px; overflow:hidden; box-shadow:0 0 0 2px rgba(255,122,26,.5), 0 8px 20px rgba(255,90,10,.3); transform:rotate(-4deg); cursor:pointer; }
+
+/* ---------- EN-TÊTE COMPACT (logo / titre / cloche) ---------- */
+.top-identity-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 18px 0; }
+.top-identity-bar .brand-mark{ width:38px; height:38px; border-radius:11px; flex:0 0 auto; }
+.top-identity-bar h1{ flex:1; text-align:center; font-family:'Bebas Neue'; font-size:20px; letter-spacing:.03em; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top-welcome-msg{ text-align:center; color:var(--muted); font-size:12.5px; margin:6px 18px 2px; }
 .brand-mark img{width:100%; height:100%; object-fit:cover; display:block;}
 .hero-chip{ font-family:'JetBrains Mono'; font-size:11px; font-weight:700; background:rgba(255,122,26,.12); border:1px solid var(--line); color:var(--ember-2); padding:6px 10px; border-radius:999px; }
 .hero-bottom{position:relative; z-index:2; padding:0 18px 18px; margin-top:56px;}
@@ -189,13 +195,13 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bo
 
 /* Bouton central (Panier) surélevé, façon patte — clin d'œil à la marque */
 .tab[data-tab="cart"]{ position:relative; }
-.tab[data-tab="cart"] svg{
-  width:22px; height:22px; padding:11px; box-sizing:content-box;
-  background:linear-gradient(135deg,var(--ember),var(--blood)); border-radius:999px; color:#fff;
+.tab[data-tab="cart"] .paw-cart-icon{
+  width:22px; height:22px; padding:11px; box-sizing:content-box; object-fit:cover;
+  background:linear-gradient(135deg,var(--ember),var(--blood)); border-radius:999px;
   transform:translateY(-14px); box-shadow:0 6px 18px rgba(255,90,10,.45), 0 0 0 4px var(--bg);
   transition:transform .15s ease;
 }
-.tab[data-tab="cart"]:active svg{ transform:translateY(-14px) scale(.92); }
+.tab[data-tab="cart"]:active .paw-cart-icon{ transform:translateY(-14px) scale(.92); }
 .tab[data-tab="cart"] span{ transform:translateY(-8px); }
 
 /* ---------- BADGES DE CONFIANCE (accueil) ---------- */
