@@ -39,21 +39,47 @@ body{
 #emberField{ position:absolute; inset:0; z-index:2; pointer-events:none; }
 
 /* Zone 1 — ~10% de hauteur, vide */
-#splash .splash-zone-top{ flex:0 0 10vh; }
+#splash .splash-zone-top{ flex:0 0 8vh; }
 
-/* Zone 2 — illustration centrée, 45-50% de hauteur, jamais recadrée/zoomée/plein écran */
+/* Zone 2 — composition centrée : glow + ours fondu vers le noir + logo net superposé.
+   Taille pilotée en largeur (pas en hauteur de viewport), jamais plein écran,
+   jamais étirée — ratio d'origine conservé via aspect-ratio. */
 #splash .splash-illustration{
-  flex:0 0 47vh; width:100%; display:flex; align-items:center; justify-content:center;
+  position:relative;
+  width:min(78vw, 430px);
+  aspect-ratio:1/1;
+  margin:0 auto;
   opacity:0; animation:splashIllusIn 1s cubic-bezier(.2,.9,.25,1) .15s forwards;
 }
-#splash .splash-illustration img{
-  max-height:100%; max-width:78%; width:auto; height:auto; display:block;
-  filter:drop-shadow(0 0 44px rgba(255,138,0,.2));
+/* Lueur orange très diffuse derrière la composition — pas un halo marqué */
+#splash .splash-glow{
+  position:absolute; inset:-15%; z-index:0;
+  background:radial-gradient(ellipse 55% 50% at 50% 42%, rgba(255,138,0,.16) 0%, rgba(255,138,0,0) 72%);
+  pointer-events:none;
+}
+/* L'ours + pot : fondu progressif vers le noir sur les 4 côtés, aucune
+   bordure/cadre perceptible — se confond avec le fond #050505 de la page.
+   L'ellipse est centrée légèrement au-dessus du milieu : l'ours (en haut)
+   reste net plus longtemps, le pot (en bas) s'estompe plus tôt, comme s'il
+   émergeait du décor plutôt que d'être coupé net. */
+#splash .splash-bear{
+  position:relative; z-index:1;
+  width:100%; height:100%; object-fit:contain; display:block;
+  -webkit-mask-image:radial-gradient(ellipse 74% 70% at 50% 40%, black 42%, rgba(0,0,0,.55) 66%, transparent 96%);
+  mask-image:radial-gradient(ellipse 74% 70% at 50% 40%, black 42%, rgba(0,0,0,.55) 66%, transparent 96%);
+}
+/* Logo texte net, superposé devant l'ours, à l'emplacement du texte intégré
+   à l'illustration — remplace visuellement le texte flou par une version nette. */
+#splash .splash-logo-overlay{
+  position:absolute; z-index:2; left:50%; top:47%;
+  width:72%; height:auto; transform:translate(-50%, -50%);
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.5));
+  pointer-events:none;
 }
 
-/* Zone 3 — légende */
+/* Zone 3 — légende, respiration plus courte sous la composition */
 #splash .splash-caption{
-  margin-top:32px; font-family:'Inter'; font-weight:500; font-size:12px; letter-spacing:.08em;
+  margin-top:18px; font-family:'Inter'; font-weight:500; font-size:12px; letter-spacing:.08em;
   color:var(--muted); text-transform:uppercase; text-align:center;
   opacity:0; animation:riseIn .7s ease .5s forwards;
 }
