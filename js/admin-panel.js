@@ -149,10 +149,10 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
   const featurePromo = document.getElementById('featurePromo').checked;
   UI.setBusy(btn, true);
   try {
-    if (title) { await Admin.saveSetting('app_title', title); state.settings.app_title = title; }
-    if (welcome) { await Admin.saveSetting('welcome_message', welcome); state.settings.welcome_message = welcome; }
-    if (banner) { await Admin.saveSetting('banner_message', banner); state.settings.banner_message = banner; }
-    if (contact && Cart.isSafeUrl(contact)) { await Admin.saveSetting('contact_link', contact); state.settings.contact_link = contact; }
+    await Admin.saveSetting('app_title', title); state.settings.app_title = title;
+    await Admin.saveSetting('welcome_message', welcome); state.settings.welcome_message = welcome;
+    await Admin.saveSetting('banner_message', banner); state.settings.banner_message = banner;
+    if (!contact || Cart.isSafeUrl(contact)) { await Admin.saveSetting('contact_link', contact); state.settings.contact_link = contact; }
     await Admin.saveSetting('payment_info', paymentInfo); state.settings.payment_info = paymentInfo;
     await Admin.saveSetting('shipping_info', shippingInfo); state.settings.shipping_info = shippingInfo;
     await Admin.saveSetting('faq_content', faqInfo); state.settings.faq_content = faqInfo;
