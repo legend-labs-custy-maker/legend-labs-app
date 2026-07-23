@@ -18,9 +18,27 @@ document.querySelectorAll('.sheet-close').forEach(btn => {
 // Clic sur l'arrière-plan sombre = fermer le panneau ouvert.
 Object.entries(sheets).forEach(([key, [, backdrop]]) => backdrop.addEventListener('click', () => close(key)));
 
+// Anime la barre de progression et le compteur de pourcentage du splash,
+// de façon synchronisée (remplace l'ancienne animation CSS indépendante).
+function animateSplashProgress(durationMs = 1800) {
+  const fill = document.getElementById('splashBarFill');
+  const percentEl = document.getElementById('splashPercent');
+  if (!fill || !percentEl) return;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const pct = Math.min(100, Math.round((elapsed / durationMs) * 100));
+    fill.style.width = pct + '%';
+    percentEl.textContent = pct + '%';
+    if (pct < 100) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 (async function boot() {
   try {
     UI.spawnEmbers(document.getElementById('emberField'), 22);
+    animateSplashProgress();
     initAdminPanel();
     await initShop();
   } catch (err) {

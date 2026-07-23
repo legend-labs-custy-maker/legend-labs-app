@@ -825,6 +825,7 @@ function miniProductCard(p, isFavorite) {
       <button class="fav-mini ${favActive ? 'active' : ''}" data-fav="${p.id}" aria-label="Favori" style="width:26px; height:26px; top:6px; right:6px;">${favActive ? '🔖' : '🏷️'}</button>
     </div>
     <p class="home-card-name">${escapeHtml(p.name)}</p>
+    <p class="home-card-sub">${variant ? escapeHtml(variant.name || '') : ''}</p>
     <div class="home-card-bottom">
       <p class="home-card-price">${variant ? variant.price + ' €' : '—'}</p>
       <button class="home-add-btn" data-homeadd="${p.id}" ${outOfStock ? 'disabled style="opacity:.35;"' : ''} aria-label="Ajouter">+</button>
@@ -869,11 +870,11 @@ export function renderHomeSections(products, reviews, onOpen, { onFavorite, isFa
 
   const section = (titleKey, defaultTitle, items) => items.length ? `
     <div class="home-section">
-      <div class="cat-tiles-head" style="padding:0 16px; margin-bottom:10px;">
+      <div class="cat-tiles-head" style="padding:0 20px; margin-bottom:10px;">
         <h3 class="home-section-title" style="margin:0; padding:0;" data-i18n="${titleKey}">${defaultTitle}</h3>
         ${onSeeAll ? `<span data-seeall="1" data-i18n="see_all">Voir tout</span>` : ''}
       </div>
-      <div class="home-grid-3">${items.slice(0, 3).map(p => miniProductCard(p, isFavorite)).join('')}</div>
+      <div class="home-grid-3">${items.map(p => miniProductCard(p, isFavorite)).join('')}</div>
     </div>` : '';
 
   const reviewSection = recentReviews.length ? `
