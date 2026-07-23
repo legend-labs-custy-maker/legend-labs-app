@@ -33,12 +33,16 @@ export function spawnEmbers(container, count = 22) {
   for (let i = 0; i < count; i++) {
     const e = document.createElement('div');
     e.className = 'ember-particle';
-    const size = 2 + Math.random() * 4;
+    const depth = Math.random(); // 0 = lointain/petit/flou, 1 = proche/grand/net
+    const size = 1.5 + depth * 5;
     e.style.width = size + 'px'; e.style.height = size + 'px';
     e.style.left = (Math.random() * 100) + '%';
-    e.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
-    e.style.animationDuration = (2.4 + Math.random() * 2.2) + 's';
-    e.style.animationDelay = (Math.random() * 2.5) + 's';
+    e.style.opacity = '0';
+    e.style.setProperty('--peak-opacity', (0.25 + depth * 0.55).toFixed(2));
+    e.style.filter = `blur(${(1 - depth) * 1.4}px)`;
+    e.style.setProperty('--drift', (Math.random() * 70 - 35) + 'px');
+    e.style.animationDuration = (3.2 + Math.random() * 3.4) + 's';
+    e.style.animationDelay = (Math.random() * 3) + 's';
     container.appendChild(e);
   }
 }
@@ -67,7 +71,7 @@ export function renderCategoryTiles(categories, onSelect) {
       <div class="cat-tiles-head"><h3 data-i18n="categories_heading">Catégories</h3></div>
       <div class="cat-tiles-row">${visible.slice(0, 8).map(c => `
         <div class="cat-tile" data-cattile="${c.id}">
-          <div class="cat-tile-icon">${c.icon ? escapeHtml(c.icon) : '🏷️'}</div>
+          <div class="cat-tile-icon">${c.icon_image_url ? `<img src="${c.icon_image_url}" alt="">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</div>
           <span>${escapeHtml(c.name)}</span>
         </div>`).join('')}</div>
     </div>`;
@@ -127,8 +131,9 @@ export function renderGrid(products, { onOpen, onQuickAdd, onLike, onFavorite, i
     const favActive = isFavorite && isFavorite(p.id);
     return `
     <div class="pcard" data-id="${p.id}">
-      ${p.is_featured && !outOfStock ? '<div class="tag new">NEW</div>' : ''}
-      ${hasPromo && !outOfStock ? '<div class="tag promo">PROMO</div>' : ''}
+      ${p.badge_image_url
+        ? `<img class="tag-image" src="${p.badge_image_url}" alt="">`
+        : `${p.is_featured && !outOfStock ? '<div class="tag new">NEW</div>' : ''}${hasPromo && !outOfStock ? '<div class="tag promo">PROMO</div>' : ''}`}
       ${outOfStock ? '<div class="tag promo" style="background:#4a4a4a;">ÉPUISÉ</div>' : ''}
       <button class="fav-mini ${favActive ? 'active' : ''}" data-fav="${p.id}" aria-label="Favori">${favActive ? '🔖' : '🏷️'}</button>
       <div class="swatch">${swatch}</div>
@@ -312,12 +317,16 @@ export function renderCartLines(lines, { onInc, onDec }) {
   container.querySelectorAll('[data-dec]').forEach(b => b.addEventListener('click', () => onDec(b.dataset.dec)));
 }
 
-export function renderAdminCategories(categories, { onDelete, onMove }) {
+export function renderAdminCategories(categories, { onDelete, onMove, onIconChange }) {
   const list = document.getElementById('adminCatList');
   if (!categories.length) { list.innerHTML = `<p class="pd-desc">Aucune catégorie pour l'instant.</p>`; return; }
   list.innerHTML = categories.map((c, i) => `
     <div class="admin-item">
-      <span class="name">${escapeHtml(c.name)}</span>
+      <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+        <span class="cat-icon-thumb" data-caticonwrap="${c.id}" style="width:32px; height:32px; border-radius:9px; background:var(--bg); border:1px solid var(--line); flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:15px; overflow:hidden; cursor:pointer;">${c.icon_image_url ? `<img src="${c.icon_image_url}" alt="" style="width:100%;height:100%;object-fit:cover;">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</span>
+        <span class="name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.name)}</span>
+        <input type="file" accept="image/*,.svg" data-caticonfile="${c.id}" style="display:none;">
+      </span>
       <span style="display:flex; gap:5px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
         <button class="reorder-btn" data-moveupcat="${c.id}" ${i === 0 ? 'disabled' : ''} aria-label="Monter">▲</button>
         <button class="reorder-btn" data-movedowncat="${c.id}" ${i === categories.length - 1 ? 'disabled' : ''} aria-label="Descendre">▼</button>
@@ -327,6 +336,14 @@ export function renderAdminCategories(categories, { onDelete, onMove }) {
   list.querySelectorAll('[data-delcat]').forEach(b => b.addEventListener('click', () => onDelete(b.dataset.delcat)));
   list.querySelectorAll('[data-moveupcat]').forEach(b => b.addEventListener('click', () => onMove(b.dataset.moveupcat, -1)));
   list.querySelectorAll('[data-movedowncat]').forEach(b => b.addEventListener('click', () => onMove(b.dataset.movedowncat, 1)));
+  if (onIconChange) {
+    list.querySelectorAll('[data-caticonwrap]').forEach(wrap => {
+      wrap.addEventListener('click', () => list.querySelector(`[data-caticonfile="${wrap.dataset.caticonwrap}"]`).click());
+    });
+    list.querySelectorAll('[data-caticonfile]').forEach(input => {
+      input.addEventListener('change', () => onIconChange(input.dataset.caticonfile, input.files[0]));
+    });
+  }
 }
 
 export function fillCategorySelect(selectEl, categories) {
@@ -403,6 +420,16 @@ export function renderAdminProducts(products, expandedIds) {
         <div style="display:flex; gap:8px;">
           <input type="text" maxlength="120" placeholder="Ex: 100% Naturel, Sans additifs" value="${escapeHtml(p.highlights || '')}" data-highlights="${p.id}">
           <button class="primary-btn" style="width:auto; padding:0 16px;" data-savehighlights="${p.id}">OK</button>
+        </div>
+
+        <h4 style="margin-top:16px;">Badge visuel (coin de la carte produit)</h4>
+        <p style="color:var(--muted); font-size:11.5px; margin:-6px 0 10px;">Image personnalisée affichée sur la carte (remplace le badge "NEW" automatique) — ex: Populaire, Édition limitée, Exclusive...</p>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <span style="width:44px; height:26px; border-radius:8px; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto;">
+            ${p.badge_image_url ? `<img src="${p.badge_image_url}" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">` : '<span style="font-size:9px; color:var(--muted);">aucun</span>'}
+          </span>
+          <input type="file" accept="image/*" data-badgeinput="${p.id}" style="flex:1;">
+          ${p.badge_image_url ? `<button class="del" data-delbadge="${p.id}">Suppr.</button>` : ''}
         </div>
 
         <h4 style="margin-top:16px;">Médias (photos / vidéos)</h4>
@@ -634,18 +661,23 @@ function formatBytes(bytes) {
 export function renderBannerRow(banners, onOpen) {
   const el = document.getElementById('bannerRow');
   if (!el) return;
-  el.innerHTML = banners.map(b => `
+  el.innerHTML = banners.map(b => {
+    const clickable = b.product_id || b.link_url;
+    const showBtn = clickable && b.show_button !== false;
+    const label = (b.button_text && b.button_text.trim()) || t('banner_discover');
+    return `
     <div class="banner-item">
       <img src="${b.image_url}" data-banner="${b.id}" alt="">
-      ${(b.product_id || b.link_url) ? `<span class="banner-discover-btn" data-i18n="banner_discover">Découvrir</span>` : ''}
-    </div>`).join('');
+      ${showBtn ? `<span class="banner-discover-btn">${escapeHtml(label)}</span>` : ''}
+    </div>`;
+  }).join('');
   el.querySelectorAll('[data-banner]').forEach(img => {
     const banner = banners.find(b => b.id === img.dataset.banner);
     if (banner?.product_id || banner?.link_url) img.addEventListener('click', () => onOpen(banner));
   });
 }
 
-export function renderAdminBanners(banners, { onToggleActive, onDelete }) {
+export function renderAdminBanners(banners, { onToggleActive, onDelete, onSaveButton }) {
   const el = document.getElementById('adminBannerList');
   if (!el) return;
   if (!banners.length) { el.innerHTML = `<p class="pd-desc">Aucune bannière pour l'instant.</p>`; return; }
@@ -659,9 +691,26 @@ export function renderAdminBanners(banners, { onToggleActive, onDelete }) {
           <button class="del" data-delbanner="${b.id}">Suppr.</button>
         </span>
       </div>
+      ${(b.product_id || b.link_url) ? `
+      <div style="display:flex; gap:6px; align-items:center; margin-top:8px;">
+        <input type="text" value="${escapeHtml(b.button_text || '')}" placeholder="Texte du bouton (Découvrir)" data-btntext="${b.id}" style="flex:1; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:12px;">
+        <label class="switch" style="width:36px; height:20px;">
+          <input type="checkbox" data-btnshow="${b.id}" ${b.show_button !== false ? 'checked' : ''}>
+          <span class="switch-slider"></span>
+        </label>
+        <button class="del" style="background:var(--card-2); border:1px solid var(--line); color:var(--ember-2); flex:0 0 auto;" data-btnsave="${b.id}">OK</button>
+      </div>` : ''}
     </div>`).join('');
   el.querySelectorAll('[data-togglebanner]').forEach(b => b.addEventListener('click', () => onToggleActive(b.dataset.togglebanner)));
   el.querySelectorAll('[data-delbanner]').forEach(b => b.addEventListener('click', () => onDelete(b.dataset.delbanner)));
+  if (onSaveButton) {
+    el.querySelectorAll('[data-btnsave]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.btnsave;
+      const text = el.querySelector(`[data-btntext="${id}"]`).value.trim();
+      const show = el.querySelector(`[data-btnshow="${id}"]`).checked;
+      onSaveButton(id, { button_text: text || null, show_button: show });
+    }));
+  }
 }
 
 // ---------- Branding (logo, couleur) et activation des fonctionnalités ----------
@@ -672,7 +721,7 @@ export function applyBranding(settings) {
   }
   const logo = settings.logo_url;
   if (logo) {
-    document.querySelectorAll('.logo-wrap img, .brand-mark img, .maintenance-logo img').forEach(img => { img.src = logo; });
+    document.querySelectorAll('.logo-wrap img, .header-brand img, .maintenance-logo img').forEach(img => { img.src = logo; });
     const bgLogo = document.querySelector('.bg-logo');
     if (bgLogo) bgLogo.style.backgroundImage = `url('${logo}')`;
   }
@@ -735,9 +784,11 @@ export function renderDashboard(stats, reviews) {
 }
 
 // ---------- Sections d'accueil premium (nouveautés, populaires, avis) ----------
-function miniProductCard(p) {
+function miniProductCard(p, isFavorite) {
   const media = firstMedia(p);
   const variant = cheapestVariant(p);
+  const outOfStock = !variant || variant.stock <= 0;
+  const favActive = isFavorite && isFavorite(p.id);
   const swatch = media
     ? (media.type === 'video'
       ? `<video src="${media.url}" muted loop playsinline></video>`
@@ -745,19 +796,34 @@ function miniProductCard(p) {
     : '';
   return `
   <div class="home-card" data-homeopen="${p.id}">
-    <div class="home-card-sw">${swatch}</div>
+    <div class="home-card-sw">
+      ${swatch}
+      ${p.badge_image_url ? `<img class="tag-image" src="${p.badge_image_url}" alt="">` : (p.is_featured && !outOfStock ? '<div class="tag new" style="font-size:9px; padding:4px 8px;">NEW</div>' : '')}
+      <button class="fav-mini ${favActive ? 'active' : ''}" data-fav="${p.id}" aria-label="Favori" style="width:26px; height:26px; top:6px; right:6px;">${favActive ? '🔖' : '🏷️'}</button>
+    </div>
     <p class="home-card-name">${escapeHtml(p.name)}</p>
     <p class="home-card-price">${variant ? variant.price + ' €' : '—'}</p>
   </div>`;
 }
 
-function wireHomeCards(container, onOpen) {
+function wireHomeCards(container, onOpen, onFavorite) {
   container.querySelectorAll('[data-homeopen]').forEach(card => {
-    card.addEventListener('click', () => onOpen(card.dataset.homeopen));
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-fav]')) return;
+      onOpen(card.dataset.homeopen);
+    });
   });
+  if (onFavorite) {
+    container.querySelectorAll('[data-fav]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onFavorite(btn.dataset.fav, btn);
+      });
+    });
+  }
 }
 
-export function renderHomeSections(products, reviews, onOpen) {
+export function renderHomeSections(products, reviews, onOpen, { onFavorite, isFavorite, onSeeAll } = {}) {
   const el = document.getElementById('homeSections');
   if (!el) return;
 
@@ -768,8 +834,11 @@ export function renderHomeSections(products, reviews, onOpen) {
 
   const section = (titleKey, defaultTitle, items) => items.length ? `
     <div class="home-section">
-      <h3 class="home-section-title" data-i18n="${titleKey}">${defaultTitle}</h3>
-      <div class="home-row">${items.map(miniProductCard).join('')}</div>
+      <div class="cat-tiles-head" style="padding:0 16px; margin-bottom:10px;">
+        <h3 class="home-section-title" style="margin:0; padding:0;" data-i18n="${titleKey}">${defaultTitle}</h3>
+        ${onSeeAll ? `<span data-seeall="1" data-i18n="see_all">Voir tout</span>` : ''}
+      </div>
+      <div class="home-row">${items.map(p => miniProductCard(p, isFavorite)).join('')}</div>
     </div>` : '';
 
   const reviewSection = recentReviews.length ? `
@@ -787,7 +856,10 @@ export function renderHomeSections(products, reviews, onOpen) {
     + section('home_popular', 'Produits populaires', popular)
     + reviewSection;
 
-  el.querySelectorAll('.home-row').forEach(row => wireHomeCards(row, onOpen));
+  el.querySelectorAll('.home-row').forEach(row => wireHomeCards(row, onOpen, onFavorite));
+  if (onSeeAll) {
+    el.querySelectorAll('[data-seeall]').forEach(btn => btn.addEventListener('click', onSeeAll));
+  }
 }
 
 export function renderSimilarProducts(products, currentProduct, onOpen) {

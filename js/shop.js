@@ -54,12 +54,7 @@ export async function loadEverything() {
         Cart.goToCheckout(banner.link_url, tg);
       }
     });
-    UI.renderCategoryTiles(state.categories, (catId) => {
-      state.filters.cat = catId; state.filters.sub = 'all';
-      refreshCategoryBars();
-      refreshGrid();
-      document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    refreshCategoryTiles();
     refreshCategoryBars();
     refreshGrid();
     refreshCartUI();
@@ -72,7 +67,7 @@ export async function loadEverything() {
     const summary = Products.reviewsSummary(state.reviews);
     UI.renderReviewsSummary(summary);
     UI.renderReviewsList(state.reviews);
-    UI.renderHomeSections(state.products, state.reviews, (productId) => openProduct(productId));
+    refreshHomeSections();
     UI.renderNotifList(state.notifications);
     UI.renderNotifBadge(computeUnreadNotifCount());
 
@@ -87,7 +82,32 @@ export async function loadEverything() {
   }
 }
 
+export function refreshHomeSections() {
+  UI.renderHomeSections(state.products, state.reviews, (productId) => openProduct(productId), {
+    onFavorite: handleFavorite,
+    isFavorite: Favorites.isFavorite,
+    onSeeAll: () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.tab[data-tab="home"]').classList.add('active');
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-home').classList.add('active');
+    },
+  });
+}
+
 // ---------- Catégories ----------
+export function refreshCategoryTiles() {
+  UI.renderCategoryTiles(state.categories, (catId) => {
+    state.filters.cat = catId; state.filters.sub = 'all';
+    refreshCategoryBars();
+    refreshGrid();
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.tab[data-tab="home"]').classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-home').classList.add('active');
+    document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
 export function refreshCategoryBars() {
   UI.renderCategoryBar(state.categories, state.filters.cat, (catId) => {
     state.filters.cat = catId; state.filters.sub = 'all';
@@ -145,6 +165,7 @@ async function handleFavorite(productId) {
     await Favorites.toggleFavorite(tg.initData, productId);
     haptic('success');
     refreshGrid();
+    refreshHomeSections();
     if (state.currentProductId === productId) renderCurrentProduct();
     renderProfileView();
   } catch { haptic('warning'); alert('Impossible de mettre à jour tes favoris pour le moment.'); }

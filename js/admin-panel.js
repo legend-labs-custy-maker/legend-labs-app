@@ -13,7 +13,7 @@ import * as Admin from './admin.js?v20260723';
 import * as Cart from './cart.js?v20260723';
 import * as UI from './ui.js?v20260723';
 import * as Products from './products.js?v20260723';
-import { refreshGrid, refreshCategoryBars, updateMaintenanceScreen, openProduct } from './shop.js?v20260723';
+import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260723';
 
 // ---------- Connexion (identité Telegram, aucun mot de passe) ----------
 let tapCount = 0, tapTimer = null;
@@ -101,13 +101,13 @@ async function openAdminPanel() {
   UI.fillSubcategorySelect(document.getElementById('npSub'), state.subcategories, state.categories[0]?.id);
   document.getElementById('npCat').onchange = (e) => UI.fillSubcategorySelect(document.getElementById('npSub'), state.subcategories, e.target.value);
   UI.fillProductSelect(document.getElementById('bnProduct'), state.products);
-  UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory });
+  UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory, onIconChange: handleCategoryIconChange });
   UI.renderAdminProducts(state.products, state.expandedProducts);
   UI.renderAdminContactLinks(state.contactLinks, handleDeleteContactLink);
   UI.renderAdminPromoCodes(state.promoCodes, handleDeletePromoCode);
   UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
   UI.renderAdminNotifications(state.notifications, handleDeleteNotification);
-  UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
+  UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
   UI.renderAdminStocks(state.products);
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
@@ -188,24 +188,53 @@ document.getElementById('addCatBtn').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   const name = document.getElementById('ncName').value.trim();
   if (!name) return;
+  const iconFile = document.getElementById('ncIconFile').files[0];
+  const statusEl = document.getElementById('ncStatus');
   UI.setBusy(btn, true);
   try {
-    const res = await Admin.createCategory({ name, sort_order: state.categories.length });
+    let icon_image_url = null;
+    if (iconFile) {
+      statusEl.textContent = 'Envoi de l\'icône...';
+      const compressed = await compressImage(iconFile);
+      const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'category-icons', file_name: compressed.name });
+      await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
+      icon_image_url = publicMediaUrl('product-media', uploadInfo.path);
+    }
+    const res = await Admin.createCategory({ name, icon_image_url, sort_order: state.categories.length });
     state.categories.push(res.data);
     document.getElementById('ncName').value = '';
-    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory });
+    document.getElementById('ncIconFile').value = '';
+    statusEl.textContent = '';
+    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory, onIconChange: handleCategoryIconChange });
     UI.fillCategorySelect(document.getElementById('npCat'), state.categories);
+    refreshCategoryTiles();
     refreshCategoryBars();
     haptic('success');
-  } catch { haptic('warning'); alert('Impossible de créer la catégorie.'); }
+  } catch { statusEl.textContent = ''; haptic('warning'); alert('Impossible de créer la catégorie.'); }
   finally { UI.setBusy(btn, false); }
 });
+async function handleCategoryIconChange(id, file) {
+  const category = state.categories.find(c => c.id === id);
+  if (!category || !file) return;
+  try {
+    const compressed = await compressImage(file);
+    const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'category-icons', file_name: compressed.name });
+    await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
+    const icon_image_url = publicMediaUrl('product-media', uploadInfo.path);
+    await Admin.updateCategory(id, { icon_image_url });
+    category.icon_image_url = icon_image_url;
+    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory, onIconChange: handleCategoryIconChange });
+    refreshCategoryTiles();
+    haptic('success');
+  } catch { haptic('warning'); alert("Impossible de mettre à jour l'icône."); }
+}
 async function handleDeleteCategory(id) {
   try {
     await Admin.deleteCategory(id);
     state.categories = state.categories.filter(c => c.id !== id);
-    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory });
+    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory, onIconChange: handleCategoryIconChange });
     UI.fillCategorySelect(document.getElementById('npCat'), state.categories);
+    refreshCategoryTiles();
     refreshCategoryBars();
     haptic('medium');
   } catch { haptic('warning'); alert('Impossible de supprimer la catégorie.'); }
@@ -225,7 +254,8 @@ async function handleMoveCategory(id, direction) {
     ]);
     a.sort_order = bOrder; b.sort_order = aOrder;
     list[index] = b; list[targetIndex] = a;
-    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory });
+    UI.renderAdminCategories(state.categories, { onDelete: handleDeleteCategory, onMove: handleMoveCategory, onIconChange: handleCategoryIconChange });
+    refreshCategoryTiles();
     refreshCategoryBars();
     haptic('light');
   } catch { haptic('warning'); alert('Impossible de réorganiser les catégories.'); }
@@ -382,6 +412,9 @@ adminProductList.addEventListener('click', async (e) => {
   const delMediaBtn = e.target.closest('[data-delmedia]');
   if (delMediaBtn) { handleDeleteMedia(delMediaBtn.dataset.delmedia); return; }
 
+  const delBadgeBtn = e.target.closest('[data-delbadge]');
+  if (delBadgeBtn) { handleDeleteBadge(delBadgeBtn.dataset.delbadge); return; }
+
   const delVariantBtn = e.target.closest('[data-delvariant]');
   if (delVariantBtn) { handleDeleteVariant(delVariantBtn.dataset.delvariant); return; }
 
@@ -429,8 +462,45 @@ adminProductList.addEventListener('change', (e) => {
   if (fileInput) {
     const productId = fileInput.dataset.mediainput;
     handleMediaUpload(productId, fileInput.files);
+    return;
+  }
+  const badgeInput = e.target.closest('[data-badgeinput]');
+  if (badgeInput) {
+    const productId = badgeInput.dataset.badgeinput;
+    const file = badgeInput.files[0];
+    if (file) handleBadgeUpload(productId, file);
   }
 });
+
+async function handleBadgeUpload(productId, file) {
+  const product = findProduct(productId);
+  if (!product) return;
+  try {
+    const compressed = await compressImage(file);
+    const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'product-badges', file_name: compressed.name });
+    await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
+    const badge_image_url = publicMediaUrl('product-media', uploadInfo.path);
+    await Admin.updateProduct(productId, { badge_image_url });
+    product.badge_image_url = badge_image_url;
+    rerenderProducts();
+    refreshGrid();
+    refreshHomeSections();
+    haptic('success');
+  } catch { haptic('warning'); alert("Impossible d'envoyer ce badge."); }
+}
+
+async function handleDeleteBadge(productId) {
+  const product = findProduct(productId);
+  if (!product) return;
+  try {
+    await Admin.updateProduct(productId, { badge_image_url: null });
+    product.badge_image_url = null;
+    rerenderProducts();
+    refreshGrid();
+    refreshHomeSections();
+    haptic('medium');
+  } catch { haptic('warning'); alert('Impossible de supprimer ce badge.'); }
+}
 
 async function handleMediaUpload(productId, fileList) {
   const product = findProduct(productId);
@@ -667,19 +737,23 @@ document.getElementById('bnFile').addEventListener('change', async (e) => {
   const statusEl = document.getElementById('bnStatus');
   const linkUrl = document.getElementById('bnLink').value.trim();
   const productId = document.getElementById('bnProduct').value || null;
+  const buttonText = document.getElementById('bnButtonText').value.trim();
+  const showButton = document.getElementById('bnShowButton').checked;
   statusEl.textContent = 'Envoi en cours...';
   try {
     const compressed = await compressImage(file);
     const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'banners', file_name: compressed.name });
     await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
     const image_url = publicMediaUrl('product-media', uploadInfo.path);
-    const res = await Admin.createBanner({ image_url, link_url: productId ? null : (linkUrl || null), product_id: productId, sort_order: state.banners.length, is_active: true });
+    const res = await Admin.createBanner({ image_url, link_url: productId ? null : (linkUrl || null), product_id: productId, button_text: buttonText || null, show_button: showButton, sort_order: state.banners.length, is_active: true });
     state.banners.push(res.data);
     document.getElementById('bnLink').value = '';
     document.getElementById('bnProduct').value = '';
+    document.getElementById('bnButtonText').value = '';
+    document.getElementById('bnShowButton').checked = true;
     e.target.value = '';
     statusEl.textContent = '';
-    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
+    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
     refreshPublicBanners();
     haptic('success');
   } catch (err) {
@@ -695,17 +769,28 @@ async function handleToggleBanner(id) {
   try {
     await Admin.updateBanner(id, { is_active: next });
     banner.is_active = next;
-    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
+    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
     refreshPublicBanners();
     haptic('success');
   } catch { haptic('warning'); alert('Impossible de modifier cette bannière.'); }
+}
+
+async function handleSaveBannerButton(id, data) {
+  const banner = state.banners.find(b => b.id === id);
+  if (!banner) return;
+  try {
+    await Admin.updateBanner(id, data);
+    Object.assign(banner, data);
+    refreshPublicBanners();
+    haptic('success');
+  } catch { haptic('warning'); alert('Impossible de mettre à jour ce bouton.'); }
 }
 
 async function handleDeleteBanner(id) {
   try {
     await Admin.deleteBanner(id);
     state.banners = state.banners.filter(b => b.id !== id);
-    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
+    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
     refreshPublicBanners();
     haptic('medium');
   } catch { haptic('warning'); alert('Impossible de supprimer cette bannière.'); }
