@@ -86,6 +86,7 @@ export function refreshHomeSections() {
   UI.renderHomeSections(state.products, state.reviews, (productId) => openProduct(productId), {
     onFavorite: handleFavorite,
     isFavorite: Favorites.isFavorite,
+    onQuickAdd: quickAddCheapestVariant,
     onSeeAll: () => {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelector('.tab[data-tab="home"]').classList.add('active');
@@ -97,16 +98,19 @@ export function refreshHomeSections() {
 
 // ---------- Catégories ----------
 export function refreshCategoryTiles() {
-  UI.renderCategoryTiles(state.categories, (catId) => {
-    state.filters.cat = catId; state.filters.sub = 'all';
-    refreshCategoryBars();
-    refreshGrid();
+  const goToBoutique = () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.tab[data-tab="home"]').classList.add('active');
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-home').classList.add('active');
+  };
+  UI.renderCategoryTiles(state.categories, (catId) => {
+    state.filters.cat = catId; state.filters.sub = 'all';
+    refreshCategoryBars();
+    refreshGrid();
+    goToBoutique();
     document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  }, goToBoutique);
 }
 export function refreshCategoryBars() {
   UI.renderCategoryBar(state.categories, state.filters.cat, (catId) => {
@@ -171,6 +175,13 @@ async function handleFavorite(productId) {
   } catch { haptic('warning'); alert('Impossible de mettre à jour tes favoris pour le moment.'); }
 }
 
+function quickAddCheapestVariant(productId) {
+  const product = state.products.find(p => p.id === productId);
+  const variant = (product.variants || []).slice().sort((a, b) => a.price - b.price)[0];
+  if (!variant || variant.stock <= 0) return;
+  addToCart(variant.id);
+}
+
 export function refreshGrid() {
   const hasActiveSearch = !!state.filters.query || state.filters.onlyPromo || state.filters.onlyNew || state.filters.onlyFavorites || state.filters.cat !== 'all';
   const homeEl = document.getElementById('homeSections');
@@ -178,12 +189,7 @@ export function refreshGrid() {
 
   UI.renderGrid(getFilteredProducts(), {
     onOpen: (productId) => openProduct(productId),
-    onQuickAdd: (productId) => {
-      const product = state.products.find(p => p.id === productId);
-      const variant = (product.variants || []).slice().sort((a, b) => a.price - b.price)[0];
-      if (!variant || variant.stock <= 0) return;
-      addToCart(variant.id);
-    },
+    onQuickAdd: quickAddCheapestVariant,
     onLike: handleLike,
     onFavorite: handleFavorite,
     isFavorite: Favorites.isFavorite,

@@ -74,13 +74,10 @@ async function openAdminPanel() {
   document.getElementById('adminMaintenanceToggle').checked = state.settings.maintenance_enabled === true || state.settings.maintenance_enabled === 'true';
   document.getElementById('adminMaintenanceTitle').value = state.settings.maintenance_title || '';
   document.getElementById('adminMaintenanceMessage').value = state.settings.maintenance_message || '';
-  document.getElementById('adminAccentColor').value = state.settings.accent_color || '#FF7A1A';
   document.getElementById('featureAvis').checked = state.settings.feature_avis !== false;
   document.getElementById('featureNotif').checked = state.settings.feature_notifications !== false;
   document.getElementById('featureFavoris').checked = state.settings.feature_favoris !== false;
   document.getElementById('featurePromo').checked = state.settings.feature_promo !== false;
-  const logoPreview = document.getElementById('logoPreview');
-  logoPreview.innerHTML = state.settings.logo_url ? `<img src="${state.settings.logo_url}" style="width:100%;height:100%;object-fit:cover;">` : '';
 
   // Vue complète (inclut les catégories/produits masqués, invisibles en lecture publique)
   try {
@@ -107,7 +104,7 @@ async function openAdminPanel() {
   UI.renderAdminPromoCodes(state.promoCodes, handleDeletePromoCode);
   UI.renderAdminReviews(state.reviews, { onToggleHidden: handleToggleReviewHidden, onDelete: handleDeleteReview });
   UI.renderAdminNotifications(state.notifications, handleDeleteNotification);
-  UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
+  UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
   UI.renderAdminStocks(state.products);
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
@@ -142,7 +139,6 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
   const maintenanceEnabled = document.getElementById('adminMaintenanceToggle').checked;
   const maintenanceTitle = document.getElementById('adminMaintenanceTitle').value.trim();
   const maintenanceMessage = document.getElementById('adminMaintenanceMessage').value.trim();
-  const accentColor = document.getElementById('adminAccentColor').value;
   const featureAvis = document.getElementById('featureAvis').checked;
   const featureNotif = document.getElementById('featureNotif').checked;
   const featureFavoris = document.getElementById('featureFavoris').checked;
@@ -159,7 +155,6 @@ document.getElementById('saveGeneral').addEventListener('click', async (e) => {
     await Admin.saveSetting('maintenance_enabled', maintenanceEnabled); state.settings.maintenance_enabled = maintenanceEnabled;
     await Admin.saveSetting('maintenance_title', maintenanceTitle); state.settings.maintenance_title = maintenanceTitle;
     await Admin.saveSetting('maintenance_message', maintenanceMessage); state.settings.maintenance_message = maintenanceMessage;
-    await Admin.saveSetting('accent_color', accentColor); state.settings.accent_color = accentColor;
     await Admin.saveSetting('feature_avis', featureAvis); state.settings.feature_avis = featureAvis;
     await Admin.saveSetting('feature_notifications', featureNotif); state.settings.feature_notifications = featureNotif;
     await Admin.saveSetting('feature_favoris', featureFavoris); state.settings.feature_favoris = featureFavoris;
@@ -737,23 +732,19 @@ document.getElementById('bnFile').addEventListener('change', async (e) => {
   const statusEl = document.getElementById('bnStatus');
   const linkUrl = document.getElementById('bnLink').value.trim();
   const productId = document.getElementById('bnProduct').value || null;
-  const buttonText = document.getElementById('bnButtonText').value.trim();
-  const showButton = document.getElementById('bnShowButton').checked;
   statusEl.textContent = 'Envoi en cours...';
   try {
     const compressed = await compressImage(file);
     const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'banners', file_name: compressed.name });
     await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
     const image_url = publicMediaUrl('product-media', uploadInfo.path);
-    const res = await Admin.createBanner({ image_url, link_url: productId ? null : (linkUrl || null), product_id: productId, button_text: buttonText || null, show_button: showButton, sort_order: state.banners.length, is_active: true });
+    const res = await Admin.createBanner({ image_url, link_url: productId ? null : (linkUrl || null), product_id: productId, sort_order: state.banners.length, is_active: true });
     state.banners.push(res.data);
     document.getElementById('bnLink').value = '';
     document.getElementById('bnProduct').value = '';
-    document.getElementById('bnButtonText').value = '';
-    document.getElementById('bnShowButton').checked = true;
     e.target.value = '';
     statusEl.textContent = '';
-    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
+    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
     refreshPublicBanners();
     haptic('success');
   } catch (err) {
@@ -769,55 +760,18 @@ async function handleToggleBanner(id) {
   try {
     await Admin.updateBanner(id, { is_active: next });
     banner.is_active = next;
-    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
+    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
     refreshPublicBanners();
     haptic('success');
   } catch { haptic('warning'); alert('Impossible de modifier cette bannière.'); }
-}
-
-async function handleSaveBannerButton(id, data) {
-  const banner = state.banners.find(b => b.id === id);
-  if (!banner) return;
-  try {
-    await Admin.updateBanner(id, data);
-    Object.assign(banner, data);
-    refreshPublicBanners();
-    haptic('success');
-  } catch { haptic('warning'); alert('Impossible de mettre à jour ce bouton.'); }
 }
 
 async function handleDeleteBanner(id) {
   try {
     await Admin.deleteBanner(id);
     state.banners = state.banners.filter(b => b.id !== id);
-    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner, onSaveButton: handleSaveBannerButton });
+    UI.renderAdminBanners(state.banners, { onToggleActive: handleToggleBanner, onDelete: handleDeleteBanner });
     refreshPublicBanners();
     haptic('medium');
   } catch { haptic('warning'); alert('Impossible de supprimer cette bannière.'); }
 }
-
-// ---------- Logo ----------
-document.getElementById('logoFile').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const statusEl = document.getElementById('logoStatus');
-  statusEl.textContent = 'Envoi en cours...';
-  try {
-    const compressed = await compressImage(file);
-    const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'branding', file_name: compressed.name });
-    await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
-    const logo_url = publicMediaUrl('product-media', uploadInfo.path);
-    await Admin.saveSetting('logo_url', logo_url);
-    await Admin.saveSetting('logo_small_url', logo_url);
-    state.settings.logo_url = logo_url;
-    state.settings.logo_small_url = logo_url;
-    document.getElementById('logoPreview').innerHTML = `<img src="${logo_url}" style="width:100%;height:100%;object-fit:cover;">`;
-    UI.applyBranding(state.settings);
-    statusEl.textContent = 'Logo mis à jour ✅';
-    e.target.value = '';
-    haptic('success');
-  } catch (err) {
-    statusEl.textContent = "Échec de l'envoi.";
-    haptic('warning');
-  }
-});

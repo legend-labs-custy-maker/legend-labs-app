@@ -61,14 +61,14 @@ export function renderHero(settings) {
   welcome.textContent = settings.welcome_message || '';
 }
 
-export function renderCategoryTiles(categories, onSelect) {
+export function renderCategoryTiles(categories, onSelect, onSeeAll) {
   const el = document.getElementById('catTiles');
   if (!el) return;
   const visible = categories.filter(c => !c.is_hidden);
   if (!visible.length) { el.innerHTML = ''; return; }
   el.innerHTML = `
     <div class="cat-tiles-section">
-      <div class="cat-tiles-head"><h3 data-i18n="categories_heading">Catégories</h3></div>
+      <div class="cat-tiles-head"><h3 data-i18n="categories_heading">Catégories</h3>${onSeeAll ? `<span data-catseeall="1" data-i18n="see_all">Voir tout</span>` : ''}</div>
       <div class="cat-tiles-row">${visible.slice(0, 8).map(c => `
         <div class="cat-tile" data-cattile="${c.id}">
           <div class="cat-tile-icon">${c.icon_image_url ? `<img src="${c.icon_image_url}" alt="">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</div>
@@ -78,6 +78,10 @@ export function renderCategoryTiles(categories, onSelect) {
   el.querySelectorAll('[data-cattile]').forEach(tile => {
     tile.addEventListener('click', () => onSelect(tile.dataset.cattile));
   });
+  if (onSeeAll) {
+    const btn = el.querySelector('[data-catseeall]');
+    if (btn) btn.addEventListener('click', onSeeAll);
+  }
 }
 
 export function renderCategoryBar(categories, activeId, onSelect) {
@@ -666,16 +670,10 @@ export function renderBannerRow(banners, onOpen) {
   if (!el) return;
   if (bannerAutoTimer) { clearInterval(bannerAutoTimer); bannerAutoTimer = null; }
   if (bannerScrollHandler) { el.removeEventListener('scroll', bannerScrollHandler); bannerScrollHandler = null; }
-  el.innerHTML = banners.map(b => {
-    const clickable = b.product_id || b.link_url;
-    const showBtn = clickable && b.show_button !== false;
-    const label = (b.button_text && b.button_text.trim()) || t('banner_discover');
-    return `
+  el.innerHTML = banners.map(b => `
     <div class="banner-item">
       <img src="${b.image_url}" data-banner="${b.id}" alt="">
-      ${showBtn ? `<span class="banner-discover-btn">${escapeHtml(label)}</span>` : ''}
-    </div>`;
-  }).join('');
+    </div>`).join('');
   el.querySelectorAll('[data-banner]').forEach(img => {
     const banner = banners.find(b => b.id === img.dataset.banner);
     if (banner?.product_id || banner?.link_url) img.addEventListener('click', () => onOpen(banner));
@@ -719,7 +717,7 @@ export function renderBannerRow(banners, onOpen) {
   }, 4500);
 }
 
-export function renderAdminBanners(banners, { onToggleActive, onDelete, onSaveButton }) {
+export function renderAdminBanners(banners, { onToggleActive, onDelete }) {
   const el = document.getElementById('adminBannerList');
   if (!el) return;
   if (!banners.length) { el.innerHTML = `<p class="pd-desc">Aucune bannière pour l'instant.</p>`; return; }
@@ -733,26 +731,9 @@ export function renderAdminBanners(banners, { onToggleActive, onDelete, onSaveBu
           <button class="del" data-delbanner="${b.id}">Suppr.</button>
         </span>
       </div>
-      ${(b.product_id || b.link_url) ? `
-      <div style="display:flex; gap:6px; align-items:center; margin-top:8px;">
-        <input type="text" value="${escapeHtml(b.button_text || '')}" placeholder="Texte du bouton (Découvrir)" data-btntext="${b.id}" style="flex:1; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:12px;">
-        <label class="switch" style="width:36px; height:20px;">
-          <input type="checkbox" data-btnshow="${b.id}" ${b.show_button !== false ? 'checked' : ''}>
-          <span class="switch-slider"></span>
-        </label>
-        <button class="del" style="background:var(--card-2); border:1px solid var(--line); color:var(--ember-2); flex:0 0 auto;" data-btnsave="${b.id}">OK</button>
-      </div>` : ''}
     </div>`).join('');
   el.querySelectorAll('[data-togglebanner]').forEach(b => b.addEventListener('click', () => onToggleActive(b.dataset.togglebanner)));
   el.querySelectorAll('[data-delbanner]').forEach(b => b.addEventListener('click', () => onDelete(b.dataset.delbanner)));
-  if (onSaveButton) {
-    el.querySelectorAll('[data-btnsave]').forEach(b => b.addEventListener('click', () => {
-      const id = b.dataset.btnsave;
-      const text = el.querySelector(`[data-btntext="${id}"]`).value.trim();
-      const show = el.querySelector(`[data-btnshow="${id}"]`).checked;
-      onSaveButton(id, { button_text: text || null, show_button: show });
-    }));
-  }
 }
 
 // ---------- Branding (logo, couleur) et activation des fonctionnalités ----------
@@ -844,14 +825,17 @@ function miniProductCard(p, isFavorite) {
       <button class="fav-mini ${favActive ? 'active' : ''}" data-fav="${p.id}" aria-label="Favori" style="width:26px; height:26px; top:6px; right:6px;">${favActive ? '🔖' : '🏷️'}</button>
     </div>
     <p class="home-card-name">${escapeHtml(p.name)}</p>
-    <p class="home-card-price">${variant ? variant.price + ' €' : '—'}</p>
+    <div class="home-card-bottom">
+      <p class="home-card-price">${variant ? variant.price + ' €' : '—'}</p>
+      <button class="home-add-btn" data-homeadd="${p.id}" ${outOfStock ? 'disabled style="opacity:.35;"' : ''} aria-label="Ajouter">+</button>
+    </div>
   </div>`;
 }
 
-function wireHomeCards(container, onOpen, onFavorite) {
+function wireHomeCards(container, onOpen, onFavorite, onQuickAdd) {
   container.querySelectorAll('[data-homeopen]').forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-fav]')) return;
+      if (e.target.closest('[data-fav]') || e.target.closest('[data-homeadd]')) return;
       onOpen(card.dataset.homeopen);
     });
   });
@@ -863,9 +847,18 @@ function wireHomeCards(container, onOpen, onFavorite) {
       });
     });
   }
+  if (onQuickAdd) {
+    container.querySelectorAll('[data-homeadd]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (btn.disabled) return;
+        onQuickAdd(btn.dataset.homeadd);
+      });
+    });
+  }
 }
 
-export function renderHomeSections(products, reviews, onOpen, { onFavorite, isFavorite, onSeeAll } = {}) {
+export function renderHomeSections(products, reviews, onOpen, { onFavorite, isFavorite, onSeeAll, onQuickAdd } = {}) {
   const el = document.getElementById('homeSections');
   if (!el) return;
 
@@ -880,7 +873,7 @@ export function renderHomeSections(products, reviews, onOpen, { onFavorite, isFa
         <h3 class="home-section-title" style="margin:0; padding:0;" data-i18n="${titleKey}">${defaultTitle}</h3>
         ${onSeeAll ? `<span data-seeall="1" data-i18n="see_all">Voir tout</span>` : ''}
       </div>
-      <div class="home-row">${items.map(p => miniProductCard(p, isFavorite)).join('')}</div>
+      <div class="home-grid-3">${items.slice(0, 3).map(p => miniProductCard(p, isFavorite)).join('')}</div>
     </div>` : '';
 
   const reviewSection = recentReviews.length ? `
@@ -898,7 +891,7 @@ export function renderHomeSections(products, reviews, onOpen, { onFavorite, isFa
     + section('home_popular', 'Produits populaires', popular)
     + reviewSection;
 
-  el.querySelectorAll('.home-row').forEach(row => wireHomeCards(row, onOpen, onFavorite));
+  el.querySelectorAll('.home-row, .home-grid-3').forEach(row => wireHomeCards(row, onOpen, onFavorite, onQuickAdd));
   if (onSeeAll) {
     el.querySelectorAll('[data-seeall]').forEach(btn => btn.addEventListener('click', onSeeAll));
   }
