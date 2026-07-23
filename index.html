@@ -385,7 +385,10 @@
       <div id="adminCatList"></div>
       <div class="admin-add-box">
         <input id="ncName" type="text" maxlength="40" placeholder="Nom de la catégorie">
+        <label style="font-size:11px; color:var(--muted);">Image de l'icône (PNG, WEBP, JPG, SVG — optionnel, sinon 🏷️ par défaut)</label>
+        <input id="ncIconFile" type="file" accept="image/*,.svg">
         <button class="primary-btn" id="addCatBtn">+ Ajouter la catégorie</button>
+        <p id="ncStatus" style="color:var(--ember-2); font-size:11px; min-height:14px; margin:0;"></p>
       </div>
     </div>
   </div>
@@ -500,6 +503,11 @@
           <option value="">— Aucun (utiliser le lien ci-dessous) —</option>
         </select>
         <input id="bnLink" type="text" placeholder="OU lien externe (optionnel, https://...)">
+        <input id="bnButtonText" type="text" placeholder="Texte du bouton (par défaut : Découvrir)">
+        <div class="settings-toggle-row" style="margin-bottom:0;">
+          <span>Afficher le bouton</span>
+          <label class="switch"><input type="checkbox" id="bnShowButton" checked><span class="switch-slider"></span></label>
+        </div>
         <input id="bnFile" type="file" accept="image/*">
         <p style="color:var(--muted); font-size:11px; margin:0;">Choisis d'abord le produit OU le lien, puis le fichier — l'upload démarre automatiquement.</p>
         <p id="bnStatus" style="color:var(--ember-2); font-size:11px; min-height:14px;"></p>
