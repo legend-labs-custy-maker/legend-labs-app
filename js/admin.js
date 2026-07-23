@@ -4,7 +4,7 @@
 // via l'Edge Function admin-api.
 // ============================================================
 
-import { telegramLogin, adminCall } from './api.js?v20260724b';
+import { telegramLogin, adminCall } from './api.js?v20260724c';
 
 let session = null; // { token, expires_at, name } — en mémoire uniquement, jamais persisté
 

@@ -4,13 +4,13 @@
 // Ne contient aucune logique d'administration.
 // ============================================================
 
-import { state, tg, haptic, open, close, isSoundEnabled, setSoundEnabled, isAutoplayEnabled, setAutoplayEnabled } from './state.js?v20260724b';
-import * as Products from './products.js?v20260724b';
-import * as Cart from './cart.js?v20260724b';
-import * as UI from './ui.js?v20260724b';
-import { t, getLang, setLang, applyTranslations } from './i18n.js?v20260724b';
-import { registerUser } from './api.js?v20260724b';
-import * as Favorites from './favorites.js?v20260724b';
+import { state, tg, haptic, open, close, isSoundEnabled, setSoundEnabled, isAutoplayEnabled, setAutoplayEnabled } from './state.js?v20260724c';
+import * as Products from './products.js?v20260724c';
+import * as Cart from './cart.js?v20260724c';
+import * as UI from './ui.js?v20260724c';
+import { t, getLang, setLang, applyTranslations } from './i18n.js?v20260724c';
+import { registerUser } from './api.js?v20260724c';
+import * as Favorites from './favorites.js?v20260724c';
 
 // ---------- Chargement du catalogue ----------
 async function safeLoad(promise, fallback, label) {
