@@ -32,40 +32,54 @@ body{
 /* ---------- SPLASH ---------- */
 #splash{
   position:fixed; inset:0; z-index:999; background:#050505;
+  display:flex; flex-direction:column; align-items:center;
   overflow:hidden; transition:opacity .6s ease, visibility .6s ease;
 }
 #splash.hide{opacity:0; visibility:hidden; pointer-events:none;}
-#splash .splash-bg{
-  position:absolute; inset:0; z-index:0;
-  opacity:0; animation:splashBgIn 1.6s ease forwards;
-}
-#splash .splash-bg img{ width:100%; height:100%; object-fit:cover; display:block; }
-#splash .splash-scrim{
-  position:absolute; inset:0; z-index:1;
-  background:linear-gradient(180deg, rgba(5,5,5,.1) 0%, rgba(5,5,5,.28) 42%, rgba(5,5,5,.9) 76%, #050505 100%);
-}
 #emberField{ position:absolute; inset:0; z-index:2; pointer-events:none; }
-#splash .splash-content{
-  position:absolute; left:0; right:0; bottom:0; z-index:3;
-  display:flex; flex-direction:column; align-items:center;
-  padding-bottom:max(56px, calc(env(safe-area-inset-bottom) + 40px));
+
+/* Zone 1 — ~10% de hauteur, vide */
+#splash .splash-zone-top{ flex:0 0 10vh; }
+
+/* Zone 2 — illustration centrée, 45-50% de hauteur, jamais recadrée/zoomée/plein écran */
+#splash .splash-illustration{
+  flex:0 0 47vh; width:100%; display:flex; align-items:center; justify-content:center;
+  opacity:0; animation:splashIllusIn 1s cubic-bezier(.2,.9,.25,1) .15s forwards;
 }
-#splash h1{
-  display:none;
+#splash .splash-illustration img{
+  max-height:100%; max-width:78%; width:auto; height:auto; display:block;
+  filter:drop-shadow(0 0 44px rgba(255,138,0,.2));
 }
-#splash p{
-  position:relative; margin:0 0 18px; font-family:'Inter'; font-weight:500; font-size:12px; letter-spacing:.08em;
-  color:var(--muted); text-transform:uppercase; opacity:0; animation:riseIn .7s ease .5s forwards;
+
+/* Zone 3 — légende */
+#splash .splash-caption{
+  margin-top:32px; font-family:'Inter'; font-weight:500; font-size:12px; letter-spacing:.08em;
+  color:var(--muted); text-transform:uppercase; text-align:center;
+  opacity:0; animation:riseIn .7s ease .5s forwards;
 }
-#splash .bar{
-  position:relative; width:180px; height:3px; background:rgba(255,255,255,.1); border-radius:99px;
-  overflow:hidden; opacity:0; animation:riseIn .5s ease .7s forwards;
+
+/* Zone 4 — barre de progression */
+#splash .splash-bar{
+  margin-top:24px; width:78%; max-width:340px; height:9px;
+  background:rgba(255,255,255,.08); border-radius:100px; overflow:hidden;
+  box-shadow:0 0 16px rgba(255,138,0,.16);
+  opacity:0; animation:riseIn .5s ease .7s forwards;
 }
-#splash .bar i{
+#splash .splash-bar i{
   display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--ember),var(--ember-2));
-  box-shadow:0 0 12px rgba(255,138,0,.5);
-  animation:load 1.5s ease .8s forwards;
+  box-shadow:0 0 12px rgba(255,138,0,.5); transition:width .1s linear;
 }
+
+/* Zone 5 — pourcentage */
+#splash .splash-percent{
+  margin-top:20px; font-family:'Sora'; font-weight:700; font-size:14px; color:var(--text);
+  text-align:center; opacity:0; animation:riseIn .5s ease .85s forwards;
+}
+
+/* Zone 6 — reste de l'espace, vide */
+#splash .splash-zone-bottom{ flex:1 1 auto; }
+
+#splash h1{ display:none; }
 .ember-particle{
   position:absolute; bottom:-10px; z-index:1; border-radius:50%; background:var(--ember-2);
   box-shadow:0 0 6px 1px var(--ember); opacity:0; animation:emberRise linear infinite;
@@ -94,7 +108,10 @@ body{
 .brand-mark:active{ transform:scale(.94); }
 
 /* ---------- EN-TÊTE COMPACT (logo / titre / cloche) ---------- */
-.top-identity-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 18px 0; }
+.top-identity-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:20px 20px 6px; min-height:75px; box-sizing:border-box; }
+.header-menu-btn{ width:36px; height:36px; flex:0 0 auto; background:var(--card); border:1px solid var(--line); border-radius:11px; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s cubic-bezier(.16,1,.3,1), border-color .15s ease; }
+.header-menu-btn svg{ width:18px; height:18px; }
+.header-menu-btn:active{ transform:scale(.92); border-color:var(--ember); }
 .top-identity-bar .brand-mark{ width:38px; height:38px; border-radius:12px; flex:0 0 auto; }
 .top-identity-bar h1{ flex:1; text-align:center; font-family:'Sora'; font-weight:700; font-size:17px; letter-spacing:-.01em; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .top-welcome-msg{ text-align:center; color:var(--muted); font-size:12.5px; margin:6px 18px 2px; }
@@ -104,7 +121,7 @@ body{
 .header-spacer{ width:36px; height:36px; flex:0 0 auto; }
 .header-brand{ flex:1; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s ease, filter .15s ease; padding:4px 0; }
 .header-brand:active{ transform:scale(.95); }
-.header-brand img{ height:54px; width:auto; max-width:82%; object-fit:contain; filter:drop-shadow(0 0 16px rgba(255,138,0,.4)); }
+.header-brand img{ height:44px; width:auto; max-width:82%; object-fit:contain; filter:drop-shadow(0 0 16px rgba(255,138,0,.4)); }
 .hero-chip{ font-family:'Inter'; font-size:11px; font-weight:700; background:rgba(255,138,0,.12); border:1px solid var(--line); color:var(--ember-2); padding:6px 10px; border-radius:999px; }
 .hero-bottom{position:relative; z-index:2; padding:0 18px 18px; margin-top:56px;}
 .hero-bottom h1{ font-family:'Sora'; font-weight:800; font-size:34px; line-height:1.05; margin:0 0 8px; letter-spacing:-.02em; }
@@ -127,13 +144,13 @@ body{
 .sub-chip.active{border-color:var(--ember-2); color:var(--ember-2);}
 
 /* ---------- TUILES CATÉGORIES (accueil) ---------- */
-.cat-tiles-section{ padding:18px 16px 6px; }
+.cat-tiles-section{ padding:28px 20px 6px; }
 .cat-tiles-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; }
 .cat-tiles-head h3{ font-family:'Sora'; font-weight:700; letter-spacing:-.01em; font-size:16px; margin:0; text-transform:none; color:var(--text); }
 .cat-tiles-head span{ font-size:12px; color:var(--ember-2); font-weight:700; cursor:pointer; }
-.cat-tiles-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.cat-tiles-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
 .cat-tile{ display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; }
-.cat-tile-icon{ width:100%; aspect-ratio:1; border-radius:16px; background:transparent; border:1.5px solid rgba(255,138,0,.35); display:flex; align-items:center; justify-content:center; font-size:22px; overflow:hidden; transition:transform .15s cubic-bezier(.16,1,.3,1), border-color .15s ease, box-shadow .15s ease; }
+.cat-tile-icon{ width:100%; aspect-ratio:1; border-radius:20px; background:transparent; border:1.5px solid rgba(255,138,0,.35); display:flex; align-items:center; justify-content:center; font-size:22px; overflow:hidden; transition:transform .15s cubic-bezier(.16,1,.3,1), border-color .15s ease, box-shadow .15s ease; }
 .cat-tile-icon img{ width:100%; height:100%; object-fit:cover; display:block; }
 .cat-tile:active .cat-tile-icon{ transform:scale(.93); border-color:var(--ember); box-shadow:0 0 16px rgba(255,138,0,.25); }
 .cat-tile span{ font-size:10.5px; font-weight:700; color:var(--muted); text-align:center; }
@@ -146,7 +163,7 @@ body{
 .filter-btn.on{border-color:var(--ember); color:var(--ember-2);}
 
 /* ---------- GRID / CARTES PRODUIT ---------- */
-.grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:8px 16px 10px;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:8px 20px 10px;}
 .pcard{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); overflow:hidden; position:relative; cursor:pointer; box-shadow:0 8px 24px rgba(0,0,0,.35); transition:transform .2s cubic-bezier(.16,1,.3,1), border-color .2s ease, box-shadow .2s ease; }
 .pcard:active{ transform:scale(.98); }
 .pcard .swatch{ height:130px; position:relative; display:flex; align-items:center; justify-content:center; font-family:'Sora'; font-weight:700; font-size:14px; color:rgba(255,255,255,.85); text-align:center; padding:10px; background:linear-gradient(100deg, var(--card-2) 30%, #24211c 50%, var(--card-2) 70%); background-size:200% 100%; animation:shimmerLoad 1.8s ease-in-out infinite; overflow:hidden; }
@@ -195,7 +212,7 @@ body{
 .cart-fab .badge{ background:rgba(0,0,0,.25); color:#0a0a0a; font-family:'JetBrains Mono'; font-size:11px; padding:2px 7px; border-radius:999px; }
 
 /* ---------- BOTTOM NAV ---------- */
-.tabbar{ position:fixed; left:0; right:0; bottom:0; z-index:50; max-width:480px; margin:0 auto; background:rgba(9,9,10,.86); backdrop-filter:blur(20px) saturate(140%); -webkit-backdrop-filter:blur(20px) saturate(140%); border-top:1px solid var(--line); display:flex; padding:8px 6px calc(8px + env(safe-area-inset-bottom)); }
+.tabbar{ position:fixed; left:0; right:0; bottom:0; z-index:50; max-width:480px; margin:0 auto; background:rgba(9,9,10,.86); backdrop-filter:blur(20px) saturate(140%); -webkit-backdrop-filter:blur(20px) saturate(140%); border-top:1px solid var(--line); display:flex; align-items:center; min-height:90px; box-sizing:border-box; padding:10px 6px calc(10px + env(safe-area-inset-bottom)); }
 .tab{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; background:none; border:none; color:var(--muted); font-size:10.5px; font-weight:600; cursor:pointer; position:relative; }
 .tab svg{width:20px; height:20px; position:relative; z-index:2; transition:transform .2s cubic-bezier(.16,1,.3,1);}
 .tab.active{color:var(--ember-2);}
@@ -207,19 +224,19 @@ body{
 .tab.active:not([data-tab="cart"]) svg{ transform:scale(1.08); filter:drop-shadow(0 0 6px rgba(255,138,0,.5)); }
 .tab[data-tab="cart"]{ position:relative; }
 .tab[data-tab="cart"] .paw-cart-icon{
-  width:34px; height:34px; padding:15px; box-sizing:content-box; object-fit:cover;
+  width:40px; height:40px; padding:18px; box-sizing:content-box; object-fit:cover;
   background:linear-gradient(135deg,var(--ember),var(--ember-2)); border-radius:999px;
-  transform:translateY(-22px);
-  box-shadow:0 10px 28px rgba(255,138,0,.55), 0 0 0 5px var(--bg), 0 0 0 7px rgba(255,138,0,.45), 0 0 32px rgba(255,138,0,.5);
+  transform:translateY(-24px);
+  box-shadow:0 10px 28px rgba(255,138,0,.55), 0 0 0 5px var(--bg), 0 0 0 7px rgba(255,138,0,.45), 0 0 34px rgba(255,138,0,.5);
   transition:transform .2s cubic-bezier(.16,1,.3,1);
 }
-.tab[data-tab="cart"]:active .paw-cart-icon{ transform:translateY(-22px) scale(.92); }
-.tab[data-tab="cart"] span{ transform:translateY(-14px); }
+.tab[data-tab="cart"]:active .paw-cart-icon{ transform:translateY(-24px) scale(.92); }
+.tab[data-tab="cart"] span{ transform:translateY(-16px); }
 
 /* ---------- BADGES DE CONFIANCE (accueil) ---------- */
 .trust-row{
   display:grid; grid-template-columns:repeat(4,1fr); gap:4px;
-  margin:16px; padding:20px 6px;
+  margin:20px; padding:20px 6px;
   background:linear-gradient(160deg, rgba(255,138,0,.06), rgba(255,255,255,.012) 60%), var(--glass);
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   border:1px solid rgba(255,138,0,.22); border-radius:20px;
@@ -467,10 +484,10 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--embe
 .stock-status.out{ background:rgba(255,255,255,.08); color:var(--muted); }
 
 /* ---------- BANNIÈRES ACCUEIL ---------- */
-.banner-row{ display:flex; gap:10px; overflow-x:auto; padding:14px 16px 4px; scroll-snap-type:x mandatory; }
+.banner-row{ display:flex; gap:14px; overflow-x:auto; padding:14px 20px 4px; scroll-snap-type:x mandatory; }
 .banner-row:empty{ display:none; }
-.banner-row .banner-item{ position:relative; width:92%; flex:0 0 auto; scroll-snap-align:center; }
-.banner-row img{ width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:var(--radius); box-shadow:0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05); cursor:pointer; transition:transform .2s cubic-bezier(.16,1,.3,1); display:block; }
+.banner-row .banner-item{ position:relative; width:100%; flex:0 0 100%; scroll-snap-align:start; }
+.banner-row img{ width:100%; height:36vh; min-height:230px; max-height:320px; object-fit:cover; border-radius:24px; box-shadow:0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05); cursor:pointer; transition:transform .2s cubic-bezier(.16,1,.3,1); display:block; }
 .banner-row img:active{ transform:scale(.97); }
 .admin-banner-thumb{ width:100%; aspect-ratio:16/7; object-fit:cover; border-radius:12px; margin-bottom:6px; }
 .banner-dots{ display:flex; justify-content:center; align-items:center; gap:6px; padding:10px 0 2px; }
@@ -480,15 +497,16 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--embe
 
 /* ---------- SECTIONS D'ACCUEIL PREMIUM ---------- */
 .home-section{ padding:6px 0 4px; }
-.home-section-title{ font-family:'Sora'; font-weight:700; letter-spacing:-.01em; font-size:17px; margin:0 0 10px; padding:0 16px; }
+.home-section-title{ font-family:'Sora'; font-weight:700; letter-spacing:-.01em; font-size:17px; margin:0 0 10px; padding:0 20px; }
 .home-row{ display:flex; gap:10px; overflow-x:auto; padding:0 16px 6px; scroll-snap-type:x mandatory; }
-.home-grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; padding:0 16px; }
+.home-grid-3{ display:grid; grid-auto-flow:column; grid-auto-columns:calc((100% - 24px) / 3); gap:12px; padding:0 20px; overflow-x:auto; scroll-snap-type:x mandatory; }
 .home-card{ flex:0 0 auto; width:130px; background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:18px; overflow:hidden; scroll-snap-align:start; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.3); transition:transform .2s cubic-bezier(.16,1,.3,1); }
 .home-grid-3 .home-card{ width:100%; }
 .home-card:active{ transform:scale(.96); }
 .home-card-sw{ position:relative; height:92px; background:var(--card-2); }
 .home-card-sw img, .home-card-sw video{ width:100%; height:100%; object-fit:cover; }
-.home-card-name{ font-family:'Sora'; font-weight:600; font-size:11.5px; margin:9px 9px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.home-card-name{ font-family:'Sora'; font-weight:600; font-size:11.5px; margin:9px 9px 1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.home-card-sub{ font-size:9.5px; color:var(--muted); margin:0 9px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-height:12px; }
 .home-card-bottom{ display:flex; align-items:center; justify-content:space-between; gap:6px; margin:0 9px 10px; }
 .home-card-price{ font-family:'JetBrains Mono'; font-size:11px; color:var(--ember-2); margin:0; }
 .home-add-btn{
