@@ -18,14 +18,29 @@
 const MAX_DIMENSION = 1600;   // largeur/hauteur max en pixels
 const JPEG_QUALITY = 0.82;    // qualité de compression (0-1)
 
-export async function compressImage(file) {
+// options :
+//  - maxDimension : taille max en pixels (défaut 1600)
+//  - square       : true = recadre automatiquement au centre en carré parfait (icônes catégories)
+//  - preserveTransparency : true = ressort en PNG avec transparence conservée (badges produits)
+// Appel sans options = comportement historique inchangé (photos produits, bannières, logo).
+export async function compressImage(file, options = {}) {
+  const { maxDimension = MAX_DIMENSION, square = false, preserveTransparency = false } = options;
   if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
 
   try {
     const bitmap = await createImageBitmap(file);
-    const { width, height } = bitmap;
+    let { width, height } = bitmap;
+    let sx = 0, sy = 0, sw = width, sh = height;
 
-    const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height));
+    if (square) {
+      const side = Math.min(width, height);
+      sx = (width - side) / 2;
+      sy = (height - side) / 2;
+      sw = side; sh = side;
+      width = side; height = side;
+    }
+
+    const scale = Math.min(1, maxDimension / Math.max(width, height));
     const targetW = Math.max(1, Math.round(width * scale));
     const targetH = Math.max(1, Math.round(height * scale));
 
@@ -33,14 +48,17 @@ export async function compressImage(file) {
     canvas.width = targetW;
     canvas.height = targetH;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(bitmap, 0, 0, targetW, targetH); // redessiner = repartir de pixels purs, sans métadonnées
+    ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, targetW, targetH); // redessiner = repartir de pixels purs, sans métadonnées
     bitmap.close?.();
 
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY));
+    const outType = preserveTransparency ? 'image/png' : 'image/jpeg';
+    const quality = preserveTransparency ? undefined : JPEG_QUALITY;
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
     if (!blob) return file;
 
-    const newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
-    return new File([blob], newName, { type: 'image/jpeg' });
+    const ext = preserveTransparency ? '.png' : '.jpg';
+    const newName = file.name.replace(/\.[^.]+$/, '') + ext;
+    return new File([blob], newName, { type: outType });
   } catch (err) {
     console.error('Compression impossible, envoi du fichier original :', err);
     return file; // en cas d'échec technique, on envoie l'original plutôt que de bloquer l'utilisateur

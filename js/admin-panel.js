@@ -182,7 +182,7 @@ document.getElementById('addCatBtn').addEventListener('click', async (e) => {
     let icon_image_url = null;
     if (iconFile) {
       statusEl.textContent = 'Envoi de l\'icône...';
-      const compressed = await compressImage(iconFile);
+      const compressed = await compressImage(iconFile, { square: true, maxDimension: 600 });
       const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'category-icons', file_name: compressed.name });
       await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
       icon_image_url = publicMediaUrl('product-media', uploadInfo.path);
@@ -204,7 +204,7 @@ async function handleCategoryIconChange(id, file) {
   const category = state.categories.find(c => c.id === id);
   if (!category || !file) return;
   try {
-    const compressed = await compressImage(file);
+    const compressed = await compressImage(file, { square: true, maxDimension: 600 });
     const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'category-icons', file_name: compressed.name });
     await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
     const icon_image_url = publicMediaUrl('product-media', uploadInfo.path);
@@ -463,7 +463,7 @@ async function handleBadgeUpload(productId, file) {
   const product = findProduct(productId);
   if (!product) return;
   try {
-    const compressed = await compressImage(file);
+    const compressed = await compressImage(file, { preserveTransparency: true, maxDimension: 500 });
     const { data: uploadInfo } = await Admin.createUploadUrl({ folder: 'product-badges', file_name: compressed.name });
     await uploadToSignedUrl({ bucket: 'product-media', path: uploadInfo.path, token: uploadInfo.token, file: compressed });
     const badge_image_url = publicMediaUrl('product-media', uploadInfo.path);
