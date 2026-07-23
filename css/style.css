@@ -106,7 +106,8 @@ body{
 .brand-mark img{width:100%; height:100%; object-fit:cover; display:block;}
 
 /* ---------- LOGO HEADER (sert de titre, devient le déclencheur admin) ---------- */
-.header-brand{ display:flex; align-items:center; justify-content:flex-start; cursor:pointer; transition:transform .15s ease, filter .15s ease; padding:4px 0; }
+.header-spacer{ width:36px; height:36px; flex:0 0 auto; }
+.header-brand{ flex:1; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s ease, filter .15s ease; padding:4px 0; }
 .header-brand:active{ transform:scale(.96); }
 .header-brand img{ height:60px; width:auto; max-width:100%; object-fit:contain; filter:drop-shadow(0 0 16px rgba(255,138,0,.4)); }
 .hero-chip{ font-family:'Inter'; font-size:11px; font-weight:700; background:rgba(255,138,0,.12); border:1px solid var(--line); color:var(--ember-2); padding:6px 10px; border-radius:999px; }
@@ -474,7 +475,7 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--embe
 .banner-row{ display:flex; gap:14px; overflow-x:auto; padding:14px 20px 4px; scroll-snap-type:x mandatory; }
 .banner-row:empty{ display:none; }
 .banner-row .banner-item{ position:relative; width:100%; flex:0 0 100%; scroll-snap-align:start; }
-.banner-row img{ width:100%; height:36vh; min-height:230px; max-height:320px; object-fit:cover; border-radius:24px; box-shadow:0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05); cursor:pointer; transition:transform .2s cubic-bezier(.16,1,.3,1); display:block; }
+.banner-row img{ width:100%; height:20vh; min-height:150px; max-height:210px; object-fit:cover; border-radius:24px; box-shadow:0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05); cursor:pointer; transition:transform .2s cubic-bezier(.16,1,.3,1); display:block; }
 .banner-row img:active{ transform:scale(.97); }
 .admin-banner-thumb{ width:100%; aspect-ratio:16/7; object-fit:cover; border-radius:12px; margin-bottom:6px; }
 .banner-dots{ display:flex; justify-content:center; align-items:center; gap:6px; padding:10px 0 2px; }
