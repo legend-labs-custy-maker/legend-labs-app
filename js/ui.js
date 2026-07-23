@@ -58,7 +58,7 @@ export function renderHero(settings) {
   const heroTitle = document.getElementById('heroTitle');
   const welcome = document.getElementById('welcomeMsg');
   if (settings.app_title) { splashTitle.textContent = settings.app_title; heroTitle.textContent = settings.app_title; }
-  if (settings.welcome_message) welcome.textContent = settings.welcome_message;
+  welcome.textContent = settings.welcome_message || '';
 }
 
 export function renderCategoryTiles(categories, onSelect) {
@@ -658,9 +658,14 @@ function formatBytes(bytes) {
 }
 
 // ---------- Bannières accueil ----------
+let bannerAutoTimer = null;
+let bannerScrollHandler = null;
 export function renderBannerRow(banners, onOpen) {
   const el = document.getElementById('bannerRow');
+  const dotsEl = document.getElementById('bannerDots');
   if (!el) return;
+  if (bannerAutoTimer) { clearInterval(bannerAutoTimer); bannerAutoTimer = null; }
+  if (bannerScrollHandler) { el.removeEventListener('scroll', bannerScrollHandler); bannerScrollHandler = null; }
   el.innerHTML = banners.map(b => {
     const clickable = b.product_id || b.link_url;
     const showBtn = clickable && b.show_button !== false;
@@ -675,6 +680,43 @@ export function renderBannerRow(banners, onOpen) {
     const banner = banners.find(b => b.id === img.dataset.banner);
     if (banner?.product_id || banner?.link_url) img.addEventListener('click', () => onOpen(banner));
   });
+
+  if (!dotsEl) return;
+  if (banners.length < 2) { dotsEl.innerHTML = ''; return; }
+  dotsEl.innerHTML = banners.map((_, i) => `<span class="banner-dot ${i === 0 ? 'is-active' : ''}" data-dot="${i}"></span>`).join('');
+  const items = () => Array.from(el.querySelectorAll('.banner-item'));
+  const goTo = (index) => {
+    const target = items()[index];
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  };
+  const setActiveDot = (index) => {
+    dotsEl.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('is-active', i === index));
+  };
+  dotsEl.querySelectorAll('[data-dot]').forEach(dot => {
+    dot.addEventListener('click', () => goTo(parseInt(dot.dataset.dot, 10)));
+  });
+
+  let scrollDebounce = null;
+  bannerScrollHandler = () => {
+    clearTimeout(scrollDebounce);
+    scrollDebounce = setTimeout(() => {
+      const rowCenter = el.scrollLeft + el.clientWidth / 2;
+      let closest = 0, closestDist = Infinity;
+      items().forEach((item, i) => {
+        const dist = Math.abs((item.offsetLeft + item.offsetWidth / 2) - rowCenter);
+        if (dist < closestDist) { closestDist = dist; closest = i; }
+      });
+      setActiveDot(closest);
+    }, 100);
+  };
+  el.addEventListener('scroll', bannerScrollHandler, { passive: true });
+
+  let currentIndex = 0;
+  bannerAutoTimer = setInterval(() => {
+    currentIndex = (currentIndex + 1) % banners.length;
+    goTo(currentIndex);
+    setActiveDot(currentIndex);
+  }, 4500);
 }
 
 export function renderAdminBanners(banners, { onToggleActive, onDelete, onSaveButton }) {
