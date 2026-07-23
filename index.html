@@ -31,16 +31,23 @@
   <div class="bolt b2"></div>
   <div id="emberField"></div>
   <div class="logo-wrap"><img src="assets/images/logo-v2.jpg" alt="Legend Lab's"></div>
+  <div class="splash-banner-slot" id="splashBannerSlot">
+    <!-- Emplacement bannière image du splash — remplace la src ci-dessous par ton visuel -->
+    <img src="assets/images/logo-title.jpg" alt="" id="splashBannerImg">
+  </div>
   <h1 class="molten" id="splashTitle">LEGEND LABS</h1>
   <p>Préparation de votre expérience...</p>
   <div class="bar"><i></i></div>
 </div>
 
-<!-- ================= HOME ================= -->
-<div id="view-home" class="view active">
+<!-- ================= ACCUEIL ================= -->
+<div id="view-accueil" class="view active">
   <div class="top-identity-bar">
-    <div class="brand-mark" id="adminTrigger"><img src="assets/images/logo-small-v2.jpg" alt="Legend Lab's"></div>
-    <h1 class="molten" id="heroTitle">LEGEND LABS</h1>
+    <div class="header-spacer" aria-hidden="true"></div>
+    <div class="header-brand" id="adminTrigger">
+      <img src="assets/images/logo-title.jpg" alt="Legend Labs">
+    </div>
+    <h1 class="molten" id="heroTitle" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">LEGEND LABS</h1>
     <button class="bell-btn" id="notifBell" aria-label="Notifications">
       🔔<span class="bell-badge hidden" id="notifBadge">0</span>
     </button>
@@ -54,6 +61,20 @@
   <div id="catTiles"></div>
 
   <div id="homeSections"></div>
+
+  <div class="trust-row">
+    <div class="trust-item"><span class="ic">✅</span><b data-i18n="trust_quality">Qualité Premium</b><span data-i18n="trust_quality_sub">Produits sélectionnés</span></div>
+    <div class="trust-item"><span class="ic">📦</span><b data-i18n="trust_shipping">Livraison Discrète</b><span data-i18n="trust_shipping_sub">Rapide et sécurisée</span></div>
+    <div class="trust-item"><span class="ic">🔒</span><b data-i18n="trust_payment">Paiement Sécurisé</b><span data-i18n="trust_payment_sub">Méthodes fiables</span></div>
+    <div class="trust-item"><span class="ic">🎧</span><b data-i18n="trust_support">Support Réactif</b><span data-i18n="trust_support_sub">7j/7 à votre écoute</span></div>
+  </div>
+</div>
+
+<!-- ================= BOUTIQUE ================= -->
+<div id="view-home" class="view">
+  <div style="padding:22px 18px 4px;">
+    <h2 class="molten" style="font-family:'Sora'; font-weight:700; letter-spacing:-.01em; font-size:26px; margin:0;" data-i18n="tab_home">Boutique</h2>
+  </div>
 
   <div class="search-bar">
     <input id="searchInput" type="search" placeholder="Rechercher un produit..." data-i18n-placeholder="search_placeholder" autocomplete="off">
@@ -71,13 +92,6 @@
   </div>
 
   <div class="grid" id="grid"></div>
-
-  <div class="trust-row">
-    <div class="trust-item"><span class="ic">✅</span><b data-i18n="trust_quality">Qualité Premium</b><span data-i18n="trust_quality_sub">Produits sélectionnés</span></div>
-    <div class="trust-item"><span class="ic">📦</span><b data-i18n="trust_shipping">Livraison Discrète</b><span data-i18n="trust_shipping_sub">Rapide et sécurisée</span></div>
-    <div class="trust-item"><span class="ic">🔒</span><b data-i18n="trust_payment">Paiement Sécurisé</b><span data-i18n="trust_payment_sub">Méthodes fiables</span></div>
-    <div class="trust-item"><span class="ic">🎧</span><b data-i18n="trust_support">Support Réactif</b><span data-i18n="trust_support_sub">7j/7 à votre écoute</span></div>
-  </div>
 </div>
 
 <!-- ================= FICHE PRODUIT ================= -->
@@ -179,8 +193,12 @@
 
 <!-- ================= BOTTOM TABS ================= -->
 <div class="tabbar">
-  <button class="tab active" data-tab="home">
+  <button class="tab active" data-tab="accueil">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+    <span data-i18n="tab_accueil">Accueil</span>
+  </button>
+  <button class="tab" data-tab="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l1 12H5L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
     <span data-i18n="tab_home">Boutique</span>
   </button>
   <button class="tab" data-tab="infos">
