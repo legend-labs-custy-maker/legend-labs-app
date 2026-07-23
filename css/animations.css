@@ -9,7 +9,7 @@
 @keyframes load{ from{width:0%;} to{width:100%;} }
 @keyframes emberRise{
   0%{opacity:0; transform:translateY(0) translateX(0);}
-  10%{opacity:1;}
+  10%{opacity:var(--peak-opacity, 1);}
   100%{opacity:0; transform:translateY(-340px) translateX(var(--drift,20px));}
 }
 @keyframes scrollMarquee{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
