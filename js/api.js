@@ -3,7 +3,7 @@
 // + appels aux Edge Functions (authentification et écritures admin).
 // ============================================================
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY, TELEGRAM_AUTH_URL, ADMIN_API_URL, VALIDATE_PROMO_URL, ADMIN_LOGIN_URL } from './config.js?v20260726';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, TELEGRAM_AUTH_URL, ADMIN_API_URL, VALIDATE_PROMO_URL, ADMIN_LOGIN_URL } from './config.js?v20260726b';
 
 const REST = `${SUPABASE_URL}/rest/v1`;
 

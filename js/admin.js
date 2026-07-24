@@ -8,7 +8,7 @@
 // qu'après le succès des 3 facteurs.
 // ============================================================
 
-import { telegramLogin, adminLoginCall, adminCall } from './api.js?v20260726';
+import { telegramLogin, adminLoginCall, adminCall } from './api.js?v20260726b';
 
 let session = null; // { token, expires_at, name } — en mémoire uniquement, jamais persisté
 

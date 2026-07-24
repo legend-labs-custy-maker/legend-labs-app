@@ -4,7 +4,7 @@
 // Nécessite d'être ouvert depuis Telegram — indisponible sinon.
 // ============================================================
 
-import { addFavorite, removeFavorite, listFavorites } from './api.js?v20260726';
+import { addFavorite, removeFavorite, listFavorites } from './api.js?v20260726b';
 
 let favoriteIds = new Set();
 let loaded = false;

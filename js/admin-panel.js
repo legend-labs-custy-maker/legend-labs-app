@@ -5,15 +5,15 @@
 // Ne contient aucune logique de parcours client.
 // ============================================================
 
-import { ADMIN_TAP_TRIGGER_COUNT } from './config.js?v20260726';
-import { uploadToSignedUrl, publicMediaUrl } from './api.js?v20260726';
-import { compressImage } from './media.js?v20260726';
-import { state, tg, haptic, open, close } from './state.js?v20260726';
-import * as Admin from './admin.js?v20260726';
-import * as Cart from './cart.js?v20260726';
-import * as UI from './ui.js?v20260726';
-import * as Products from './products.js?v20260726';
-import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260726';
+import { ADMIN_TAP_TRIGGER_COUNT } from './config.js?v20260726b';
+import { uploadToSignedUrl, publicMediaUrl } from './api.js?v20260726b';
+import { compressImage } from './media.js?v20260726b';
+import { state, tg, haptic, open, close } from './state.js?v20260726b';
+import * as Admin from './admin.js?v20260726b';
+import * as Cart from './cart.js?v20260726b';
+import * as UI from './ui.js?v20260726b';
+import * as Products from './products.js?v20260726b';
+import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260726b';
 
 // ---------- Connexion admin à 3 facteurs (Telegram -> email/mot de passe -> TOTP) ----------
 let tapCount = 0, tapTimer = null;
@@ -92,9 +92,11 @@ document.getElementById('adminLoginStep2Btn').addEventListener('click', async (e
     haptic('light');
   } catch (err) {
     haptic('warning');
-    statusEl.textContent = String(err.message).includes('too_many_attempts')
-      ? 'Trop de tentatives, réessaie dans quelques minutes.'
-      : 'Email ou mot de passe incorrect.';
+    const msg = String(err.message);
+    if (msg.includes('too_many_attempts')) statusEl.textContent = 'Trop de tentatives, réessaie dans quelques minutes.';
+    else if (msg.includes('challenge_expired')) statusEl.textContent = "Trop de temps écoulé depuis la vérification Telegram — ferme cette fenêtre et retape 5 fois sur le logo pour recommencer.";
+    else if (msg.includes('invalid_credentials')) statusEl.textContent = 'Email ou mot de passe incorrect.';
+    else statusEl.textContent = `Erreur : ${msg}`;
   } finally {
     UI.setBusy(btn, false);
   }

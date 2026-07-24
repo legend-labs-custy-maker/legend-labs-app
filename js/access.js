@@ -7,7 +7,7 @@
 // disparaître, comme pour la session admin.
 // ============================================================
 
-import { GLOBAL_PASSWORD_AUTH_URL } from './config.js?v20260726';
+import { GLOBAL_PASSWORD_AUTH_URL } from './config.js?v20260726b';
 
 let accessToken = null;
 
