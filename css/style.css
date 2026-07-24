@@ -443,7 +443,8 @@ body{
 .admin-section{display:none;}
 .admin-section.active{display:block;}
 .admin-add-box{ display:flex; flex-direction:column; gap:8px; background:var(--card-2); padding:13px; border-radius:14px; border:1px solid var(--line); }
-#sheetAdmin input, #sheetAdmin select, #sheetAdmin textarea{
+#sheetAdmin input, #sheetAdmin select, #sheetAdmin textarea,
+#sheetAdminLogin input, #sheetAdminLogin select, #sheetAdminLogin textarea{
   width:100%; padding:11px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:13px; font-family:'Inter';
 }
 .admin-item{ border:1px solid var(--line); border-radius:14px; padding:11px; margin-bottom:8px; background:var(--card-2); display:flex; justify-content:space-between; align-items:center; gap:8px; }
