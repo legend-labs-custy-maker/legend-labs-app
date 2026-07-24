@@ -1,0 +1,16 @@
+# Secrets — ne jamais committer
+.env
+.env.local
+.env.production
+.env.*.local
+*.pem
+*.key
+
+# Système / éditeur
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dépendances (si un outil de build est ajouté plus tard)
+node_modules/

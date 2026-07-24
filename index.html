@@ -9,10 +9,21 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v20260724c">
-<link rel="stylesheet" href="css/animations.css?v20260724c">
+<link rel="stylesheet" href="css/style.css?v20260725b">
+<link rel="stylesheet" href="css/animations.css?v20260725b">
 </head>
 <body>
+
+<!-- ================= VERROU MOT DE PASSE GLOBAL ================= -->
+<div id="accessLock" class="access-lock">
+  <div class="access-lock-inner">
+    <img src="assets/images/logo-header.png" alt="Legend Labs" class="access-lock-logo">
+    <p class="access-lock-label">Accès restreint</p>
+    <input type="password" id="accessPasswordInput" placeholder="Mot de passe" autocomplete="off" inputmode="text">
+    <button class="primary-btn" id="accessSubmitBtn">Déverrouiller</button>
+    <p class="access-lock-error" id="accessLockError"></p>
+  </div>
+</div>
 
 <!-- ================= SPLASH ================= -->
 <!-- ================= MAINTENANCE ================= -->
@@ -477,6 +488,6 @@
   <div id="lightboxTrack" class="lightbox-track"></div>
 </div>
 
-<script type="module" src="js/app.js?v20260724c"></script>
+<script type="module" src="js/app.js?v20260725b"></script>
 </body>
 </html>
