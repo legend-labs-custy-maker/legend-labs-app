@@ -5,10 +5,11 @@
 // les deux et gérer l'écran de lancement.
 // ============================================================
 
-import { close, haptic, sheets } from './state.js?v20260724c';
-import { initShop } from './shop.js?v20260724c';
-import { initAdminPanel } from './admin-panel.js?v20260724c';
-import * as UI from './ui.js?v20260724c';
+import { close, haptic, sheets } from './state.js?v20260725b';
+import { initShop } from './shop.js?v20260725b';
+import { initAdminPanel } from './admin-panel.js?v20260725b';
+import * as UI from './ui.js?v20260725b';
+import { submitGlobalPassword } from './access.js?v20260725b';
 
 // Bouton de fermeture générique, commun à tous les panneaux
 // (boutique et admin).
@@ -35,7 +36,7 @@ function animateSplashProgress(durationMs = 1800) {
   requestAnimationFrame(tick);
 }
 
-(async function boot() {
+async function boot() {
   try {
     UI.spawnEmbers(document.getElementById('emberField'), 22);
     animateSplashProgress();
@@ -50,4 +51,38 @@ function animateSplashProgress(durationMs = 1800) {
       haptic('rigid');
     }, 2200);
   }
+}
+
+// ---- Verrou mot de passe global : rien ne démarre avant ----
+(function wireAccessLock() {
+  const lockEl = document.getElementById('accessLock');
+  const input = document.getElementById('accessPasswordInput');
+  const btn = document.getElementById('accessSubmitBtn');
+  const errorEl = document.getElementById('accessLockError');
+
+  function tryUnlock() {
+    const password = input.value;
+    if (!password) return;
+    errorEl.textContent = '';
+    UI.setBusy(btn, true);
+    submitGlobalPassword(password)
+      .then(() => {
+        lockEl.classList.add('hide');
+        haptic('success');
+        setTimeout(() => { lockEl.remove(); boot(); }, 400);
+      })
+      .catch((err) => {
+        UI.setBusy(btn, false);
+        haptic('warning');
+        errorEl.textContent = String(err.message).includes('too_many_attempts')
+          ? 'Trop de tentatives — réessaie dans quelques minutes.'
+          : 'Mot de passe incorrect.';
+        input.value = '';
+        input.focus();
+      });
+  }
+
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+  input.focus();
 })();

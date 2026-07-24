@@ -11,6 +11,7 @@ export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const TELEGRAM_AUTH_URL = `${SUPABASE_URL}/functions/v1/smooth-processor`; // fonction "telegram-auth"
 export const ADMIN_API_URL = `${SUPABASE_URL}/functions/v1/admin-api`;
 export const VALIDATE_PROMO_URL = `${SUPABASE_URL}/functions/v1/validate-promo`;
+export const GLOBAL_PASSWORD_AUTH_URL = `${SUPABASE_URL}/functions/v1/global-password-auth`; // à ajuster selon le nom réel affiché dans Supabase
 
 // Nombre de taps sur le logo pour révéler l'accès admin (discrétion)
 export const ADMIN_TAP_TRIGGER_COUNT = 5;

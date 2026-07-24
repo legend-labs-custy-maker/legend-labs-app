@@ -3,7 +3,7 @@
 // données en HTML / DOM. Aucun appel réseau ici.
 // ============================================================
 
-import { t } from './i18n.js?v20260724c';
+import { t } from './i18n.js?v20260725b';
 export function escapeHtml(str) {
   return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -66,7 +66,7 @@ export function renderCategoryTiles(categories, onSelect, onSeeAll) {
       <div class="cat-tiles-head"><h3 data-i18n="categories_heading">Catégories</h3>${onSeeAll ? `<span data-catseeall="1" data-i18n="see_all">Voir tout</span>` : ''}</div>
       <div class="cat-tiles-row">${visible.slice(0, 8).map(c => `
         <div class="cat-tile" data-cattile="${c.id}">
-          <div class="cat-tile-icon">${c.icon_image_url ? `<img src="${c.icon_image_url}" alt="">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</div>
+          <div class="cat-tile-icon">${c.icon_image_url ? `<img src="${escapeHtml(c.icon_image_url)}" alt="">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</div>
           <span>${escapeHtml(c.name)}</span>
         </div>`).join('')}</div>
     </div>`;
@@ -124,14 +124,14 @@ export function renderGrid(products, { onOpen, onQuickAdd, onLike, onFavorite, i
     const hasPromo = (p.variants || []).some(v => v.promo);
     const swatch = media
       ? (media.type === 'video'
-        ? `<video src="${media.url}" muted loop playsinline ${videoAutoplay ? 'autoplay' : ''}></video>`
-        : `<img src="${media.url}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async">`)
+        ? `<video src="${escapeHtml(media.url)}" muted loop playsinline ${videoAutoplay ? 'autoplay' : ''}></video>`
+        : `<img src="${escapeHtml(media.url)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async">`)
       : escapeHtml(p.name);
     const favActive = isFavorite && isFavorite(p.id);
     return `
     <div class="pcard" data-id="${p.id}">
       ${p.badge_image_url
-        ? `<img class="tag-image" src="${p.badge_image_url}" alt="">`
+        ? `<img class="tag-image" src="${escapeHtml(p.badge_image_url)}" alt="">`
         : `${p.is_featured && !outOfStock ? '<div class="tag new">NEW</div>' : ''}${hasPromo && !outOfStock ? '<div class="tag promo">PROMO</div>' : ''}`}
       ${outOfStock ? '<div class="tag promo" style="background:#4a4a4a;">ÉPUISÉ</div>' : ''}
       <button class="fav-mini ${favActive ? 'active' : ''}" data-fav="${p.id}" aria-label="Favori">${favActive ? '🔖' : '🏷️'}</button>
@@ -182,8 +182,8 @@ export function renderProductDetail(product, { selectedVariantId, onSelectVarian
   const media = (product.media || []).slice().sort((a, b) => a.sort_order - b.sort_order);
   const gallery = media.length
     ? `<div class="pd-gallery">${media.map((m, i) => m.type === 'video'
-        ? `<div class="pd-gallery-item" data-galleryidx="${i}"><video src="${m.url}" muted playsinline></video><span class="pd-play">▶</span></div>`
-        : `<div class="pd-gallery-item" data-galleryidx="${i}"><img src="${m.url}" alt="${escapeHtml(product.name)}" loading="lazy"></div>`).join('')}</div>`
+        ? `<div class="pd-gallery-item" data-galleryidx="${i}"><video src="${escapeHtml(m.url)}" muted playsinline></video><span class="pd-play">▶</span></div>`
+        : `<div class="pd-gallery-item" data-galleryidx="${i}"><img src="${escapeHtml(m.url)}" alt="${escapeHtml(product.name)}" loading="lazy"></div>`).join('')}</div>`
     : '';
 
   const variants = product.variants || [];
@@ -259,8 +259,8 @@ export function openLightbox(media, startIndex = 0) {
   track.innerHTML = media.map(m => `
     <div class="lightbox-item">
       ${m.type === 'video'
-        ? `<video src="${m.url}" controls playsinline></video>`
-        : `<img src="${m.url}" alt="">`}
+        ? `<video src="${escapeHtml(m.url)}" controls playsinline></video>`
+        : `<img src="${escapeHtml(m.url)}" alt="">`}
     </div>`).join('');
 
   document.getElementById('lightbox').classList.add('show');
@@ -300,7 +300,7 @@ export function renderCartLines(lines, { onInc, onDec }) {
     const media = firstMedia(l.product);
     return `
     <div class="cart-line" data-variant="${l.variant.id}">
-      <div class="sw">${media && media.type === 'image' ? `<img src="${media.url}" alt="">` : ''}</div>
+      <div class="sw">${media && media.type === 'image' ? `<img src="${escapeHtml(media.url)}" alt="">` : ''}</div>
       <div class="meta">
         <p class="n">${escapeHtml(l.product.name)} — ${escapeHtml(l.variant.name)}</p>
         <p class="p">${l.unitPrice} € / unité · ${l.lineTotal} €</p>
@@ -322,7 +322,7 @@ export function renderAdminCategories(categories, { onDelete, onMove, onIconChan
   list.innerHTML = categories.map((c, i) => `
     <div class="admin-item">
       <span style="display:flex; align-items:center; gap:8px; min-width:0;">
-        <span class="cat-icon-thumb" data-caticonwrap="${c.id}" style="width:32px; height:32px; border-radius:9px; background:var(--bg); border:1px solid var(--line); flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:15px; overflow:hidden; cursor:pointer;">${c.icon_image_url ? `<img src="${c.icon_image_url}" alt="" style="width:100%;height:100%;object-fit:cover;">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</span>
+        <span class="cat-icon-thumb" data-caticonwrap="${c.id}" style="width:32px; height:32px; border-radius:9px; background:var(--bg); border:1px solid var(--line); flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:15px; overflow:hidden; cursor:pointer;">${c.icon_image_url ? `<img src="${escapeHtml(c.icon_image_url)}" alt="" style="width:100%;height:100%;object-fit:cover;">` : (c.icon ? escapeHtml(c.icon) : '🏷️')}</span>
         <span class="name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.name)}</span>
         <input type="file" accept="image/*,.svg" data-caticonfile="${c.id}" style="display:none;">
       </span>
@@ -362,7 +362,7 @@ export function fillSubcategorySelect(selectEl, subcategories, categoryId) {
 
 function mediaThumbHtml(m) {
   return `<div class="media-thumb">
-    ${m.type === 'video' ? `<video src="${m.url}" muted></video>` : `<img src="${m.url}" alt="">`}
+    ${m.type === 'video' ? `<video src="${escapeHtml(m.url)}" muted></video>` : `<img src="${escapeHtml(m.url)}" alt="">`}
     <button data-delmedia="${m.id}" aria-label="Supprimer">✕</button>
   </div>`;
 }
@@ -425,7 +425,7 @@ export function renderAdminProducts(products, expandedIds) {
         <p style="color:var(--muted); font-size:11.5px; margin:-6px 0 10px;">Image personnalisée affichée sur la carte (remplace le badge "NEW" automatique) — ex: Populaire, Édition limitée, Exclusive...</p>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
           <span style="width:44px; height:26px; border-radius:8px; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto;">
-            ${p.badge_image_url ? `<img src="${p.badge_image_url}" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">` : '<span style="font-size:9px; color:var(--muted);">aucun</span>'}
+            ${p.badge_image_url ? `<img src="${escapeHtml(p.badge_image_url)}" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">` : '<span style="font-size:9px; color:var(--muted);">aucun</span>'}
           </span>
           <input type="file" accept="image/*" data-badgeinput="${p.id}" style="flex:1;">
           ${p.badge_image_url ? `<button class="del" data-delbadge="${p.id}">Suppr.</button>` : ''}
@@ -555,7 +555,7 @@ export function renderProfileFavorites(products, onOpen) {
     const variant = cheapestVariant(p);
     return `
     <div class="profile-fav-row" data-favopen="${p.id}">
-      <div class="sw">${media && media.type === 'image' ? `<img src="${media.url}" alt="">` : ''}</div>
+      <div class="sw">${media && media.type === 'image' ? `<img src="${escapeHtml(media.url)}" alt="">` : ''}</div>
       <div class="meta">
         <b>${escapeHtml(p.name)}</b>
         <span>${variant ? variant.price + ' €' : '—'}</span>
@@ -623,7 +623,7 @@ export function renderBannerRow(banners, onOpen) {
   if (bannerScrollHandler) { el.removeEventListener('scroll', bannerScrollHandler); bannerScrollHandler = null; }
   el.innerHTML = banners.map(b => `
     <div class="banner-item">
-      <img src="${b.image_url}" data-banner="${b.id}" alt="">
+      <img src="${escapeHtml(b.image_url)}" data-banner="${b.id}" alt="">
     </div>`).join('');
   el.querySelectorAll('[data-banner]').forEach(img => {
     const banner = banners.find(b => b.id === img.dataset.banner);
@@ -674,7 +674,7 @@ export function renderAdminBanners(banners, { onToggleActive, onDelete }) {
   if (!banners.length) { el.innerHTML = `<p class="pd-desc">Aucune bannière pour l'instant.</p>`; return; }
   el.innerHTML = banners.map(b => `
     <div class="admin-item" style="flex-direction:column; align-items:stretch;">
-      <img class="admin-banner-thumb" src="${b.image_url}" alt="">
+      <img class="admin-banner-thumb" src="${escapeHtml(b.image_url)}" alt="">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span class="name" style="font-size:11px; color:var(--muted);">${b.link_url ? escapeHtml(b.link_url) : 'Aucun lien'}${!b.is_active ? ' · désactivée' : ''}</span>
         <span style="display:flex; gap:6px;">
@@ -760,14 +760,14 @@ function miniProductCard(p, isFavorite) {
   const favActive = isFavorite && isFavorite(p.id);
   const swatch = media
     ? (media.type === 'video'
-      ? `<video src="${media.url}" muted loop playsinline></video>`
-      : `<img src="${media.url}" alt="${escapeHtml(p.name)}" loading="lazy">`)
+      ? `<video src="${escapeHtml(media.url)}" muted loop playsinline></video>`
+      : `<img src="${escapeHtml(media.url)}" alt="${escapeHtml(p.name)}" loading="lazy">`)
     : '';
   return `
   <div class="home-card" data-homeopen="${p.id}">
     <div class="home-card-sw">
       ${swatch}
-      ${p.badge_image_url ? `<img class="tag-image" src="${p.badge_image_url}" alt="">` : (p.is_featured && !outOfStock ? '<div class="tag new" style="font-size:9px; padding:4px 8px;">NEW</div>' : '')}
+      ${p.badge_image_url ? `<img class="tag-image" src="${escapeHtml(p.badge_image_url)}" alt="">` : (p.is_featured && !outOfStock ? '<div class="tag new" style="font-size:9px; padding:4px 8px;">NEW</div>' : '')}
       <button class="fav-mini ${favActive ? 'active' : ''}" data-fav="${p.id}" aria-label="Favori" style="width:26px; height:26px; top:6px; right:6px;">${favActive ? '🔖' : '🏷️'}</button>
     </div>
     <p class="home-card-name">${escapeHtml(p.name)}</p>
