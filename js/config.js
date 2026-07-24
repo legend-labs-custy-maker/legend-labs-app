@@ -12,6 +12,7 @@ export const TELEGRAM_AUTH_URL = `${SUPABASE_URL}/functions/v1/smooth-processor`
 export const ADMIN_API_URL = `${SUPABASE_URL}/functions/v1/admin-api`;
 export const VALIDATE_PROMO_URL = `${SUPABASE_URL}/functions/v1/validate-promo`;
 export const GLOBAL_PASSWORD_AUTH_URL = `${SUPABASE_URL}/functions/v1/global-password-auth`; // à ajuster selon le nom réel affiché dans Supabase
+export const ADMIN_LOGIN_URL = `${SUPABASE_URL}/functions/v1/admin-login`; // à ajuster selon le nom réel affiché dans Supabase
 
 // Nombre de taps sur le logo pour révéler l'accès admin (discrétion)
 export const ADMIN_TAP_TRIGGER_COUNT = 5;

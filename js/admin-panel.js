@@ -5,18 +5,33 @@
 // Ne contient aucune logique de parcours client.
 // ============================================================
 
-import { ADMIN_TAP_TRIGGER_COUNT } from './config.js?v20260725b';
-import { uploadToSignedUrl, publicMediaUrl } from './api.js?v20260725b';
-import { compressImage } from './media.js?v20260725b';
-import { state, tg, haptic, open, close } from './state.js?v20260725b';
-import * as Admin from './admin.js?v20260725b';
-import * as Cart from './cart.js?v20260725b';
-import * as UI from './ui.js?v20260725b';
-import * as Products from './products.js?v20260725b';
-import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260725b';
+import { ADMIN_TAP_TRIGGER_COUNT } from './config.js?v20260726';
+import { uploadToSignedUrl, publicMediaUrl } from './api.js?v20260726';
+import { compressImage } from './media.js?v20260726';
+import { state, tg, haptic, open, close } from './state.js?v20260726';
+import * as Admin from './admin.js?v20260726';
+import * as Cart from './cart.js?v20260726';
+import * as UI from './ui.js?v20260726';
+import * as Products from './products.js?v20260726';
+import { refreshGrid, refreshCategoryBars, refreshCategoryTiles, refreshHomeSections, updateMaintenanceScreen, openProduct } from './shop.js?v20260726';
 
-// ---------- Connexion (identité Telegram, aucun mot de passe) ----------
+// ---------- Connexion admin à 3 facteurs (Telegram -> email/mot de passe -> TOTP) ----------
 let tapCount = 0, tapTimer = null;
+let currentChallengeToken = null;
+let pendingLoginState = null; // { access_token, factor_id, mfa_challenge_id? } entre les étapes
+
+function resetAdminLoginUI() {
+  document.getElementById('adminLoginStep2').style.display = 'none';
+  document.getElementById('adminEnrollStep').style.display = 'none';
+  document.getElementById('adminMfaStep').style.display = 'none';
+  document.getElementById('adminLoginEmail').value = '';
+  document.getElementById('adminLoginPassword').value = '';
+  document.getElementById('adminEnrollCode').value = '';
+  document.getElementById('adminMfaCode').value = '';
+  currentChallengeToken = null;
+  pendingLoginState = null;
+}
+
 async function handleAdminTriggerTap() {
   tapCount++;
   clearTimeout(tapTimer);
@@ -27,6 +42,7 @@ async function handleAdminTriggerTap() {
 
   if (Admin.isAdminLoggedIn()) { document.getElementById('maintenanceScreen').classList.remove('show'); openAdminPanel(); return; }
 
+  resetAdminLoginUI();
   open('adminLogin');
   const statusEl = document.getElementById('adminLoginStatus');
   try {
@@ -35,11 +51,11 @@ async function handleAdminTriggerTap() {
       return;
     }
     statusEl.textContent = 'Vérification de ton identité Telegram...';
-    await Admin.tryAdminLogin(tg);
-    statusEl.textContent = 'Identité confirmée ✅';
+    const result = await Admin.tryAdminLogin(tg);
+    currentChallengeToken = result.challenge_token;
+    statusEl.textContent = 'Identité Telegram confirmée ✅ — connecte-toi avec ton compte admin.';
     haptic('success');
-    document.getElementById('maintenanceScreen').classList.remove('show');
-    setTimeout(() => { close('adminLogin'); openAdminPanel(); }, 400);
+    document.getElementById('adminLoginStep2').style.display = 'block';
   } catch (err) {
     haptic('warning');
     if (String(err.message).includes('not_admin')) statusEl.textContent = "Ce compte Telegram n'est pas autorisé à administrer cette boutique.";
@@ -49,6 +65,84 @@ async function handleAdminTriggerTap() {
 }
 document.getElementById('adminTrigger').addEventListener('click', handleAdminTriggerTap);
 document.getElementById('maintenanceAdminTrigger').addEventListener('click', handleAdminTriggerTap);
+
+// Facteur 2 : email + mot de passe
+document.getElementById('adminLoginStep2Btn').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  const email = document.getElementById('adminLoginEmail').value.trim();
+  const password = document.getElementById('adminLoginPassword').value;
+  const statusEl = document.getElementById('adminLoginStatus');
+  if (!email || !password || !currentChallengeToken) return;
+  UI.setBusy(btn, true);
+  try {
+    const result = await Admin.adminLoginStart(currentChallengeToken, email, password);
+    if (result.needs_enrollment) {
+      pendingLoginState = { access_token: result.access_token, factor_id: result.factor_id };
+      document.getElementById('adminLoginStep2').style.display = 'none';
+      document.getElementById('adminEnrollStep').style.display = 'block';
+      document.getElementById('adminEnrollQr').innerHTML = result.qr_code || '';
+      document.getElementById('adminEnrollSecret').textContent = result.secret ? `Ou saisis cette clé manuellement : ${result.secret}` : '';
+      statusEl.textContent = 'Première connexion : configure ton authentification à deux facteurs.';
+    } else if (result.needs_mfa_code) {
+      pendingLoginState = { access_token: result.access_token, factor_id: result.factor_id, mfa_challenge_id: result.mfa_challenge_id };
+      document.getElementById('adminLoginStep2').style.display = 'none';
+      document.getElementById('adminMfaStep').style.display = 'block';
+      statusEl.textContent = "Saisis le code de ton application d'authentification.";
+    }
+    haptic('light');
+  } catch (err) {
+    haptic('warning');
+    statusEl.textContent = String(err.message).includes('too_many_attempts')
+      ? 'Trop de tentatives, réessaie dans quelques minutes.'
+      : 'Email ou mot de passe incorrect.';
+  } finally {
+    UI.setBusy(btn, false);
+  }
+});
+
+// Facteur 3a : tout premier enrôlement TOTP
+document.getElementById('adminEnrollBtn').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  const code = document.getElementById('adminEnrollCode').value.trim();
+  const statusEl = document.getElementById('adminLoginStatus');
+  if (!code || !pendingLoginState || !currentChallengeToken) return;
+  UI.setBusy(btn, true);
+  try {
+    await Admin.adminVerifyEnrollment(currentChallengeToken, pendingLoginState.access_token, pendingLoginState.factor_id, code);
+    statusEl.textContent = 'Authentification à deux facteurs activée ✅';
+    haptic('success');
+    document.getElementById('maintenanceScreen').classList.remove('show');
+    setTimeout(() => { close('adminLogin'); openAdminPanel(); }, 400);
+  } catch (err) {
+    haptic('warning');
+    statusEl.textContent = 'Code incorrect, réessaie.';
+    document.getElementById('adminEnrollCode').value = '';
+  } finally {
+    UI.setBusy(btn, false);
+  }
+});
+
+// Facteur 3b : code TOTP (connexions suivantes)
+document.getElementById('adminMfaBtn').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  const code = document.getElementById('adminMfaCode').value.trim();
+  const statusEl = document.getElementById('adminLoginStatus');
+  if (!code || !pendingLoginState || !currentChallengeToken) return;
+  UI.setBusy(btn, true);
+  try {
+    await Admin.adminVerifyMfa(currentChallengeToken, pendingLoginState.access_token, pendingLoginState.factor_id, pendingLoginState.mfa_challenge_id, code);
+    statusEl.textContent = 'Connecté ✅';
+    haptic('success');
+    document.getElementById('maintenanceScreen').classList.remove('show');
+    setTimeout(() => { close('adminLogin'); openAdminPanel(); }, 400);
+  } catch (err) {
+    haptic('warning');
+    statusEl.textContent = 'Code incorrect, réessaie.';
+    document.getElementById('adminMfaCode').value = '';
+  } finally {
+    UI.setBusy(btn, false);
+  }
+});
 
 document.querySelectorAll('.admin-tab').forEach(tabBtn => {
   tabBtn.addEventListener('click', () => {

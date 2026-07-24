@@ -5,11 +5,11 @@
 // les deux et gérer l'écran de lancement.
 // ============================================================
 
-import { close, haptic, sheets } from './state.js?v20260725b';
-import { initShop } from './shop.js?v20260725b';
-import { initAdminPanel } from './admin-panel.js?v20260725b';
-import * as UI from './ui.js?v20260725b';
-import { submitGlobalPassword } from './access.js?v20260725b';
+import { close, haptic, sheets } from './state.js?v20260726';
+import { initShop } from './shop.js?v20260726';
+import { initAdminPanel } from './admin-panel.js?v20260726';
+import * as UI from './ui.js?v20260726';
+import { submitGlobalPassword } from './access.js?v20260726';
 
 // Bouton de fermeture générique, commun à tous les panneaux
 // (boutique et admin).

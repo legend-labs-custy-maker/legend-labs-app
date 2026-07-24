@@ -1,10 +1,14 @@
 // ============================================================
-// Administration : connexion par identité Telegram vérifiée
-// côté serveur (aucun mot de passe), puis actions sécurisées
-// via l'Edge Function admin-api.
+// Administration : authentification à 3 facteurs.
+//   1. Identité Telegram vérifiée côté serveur (tryAdminLogin)
+//   2. Email + mot de passe (adminLoginStart)
+//   3. TOTP — enrôlement la première fois (adminVerifyEnrollment),
+//      code à chaque connexion suivante (adminVerifyMfa)
+// La vraie session admin (utilisée pour admin-api) n'est délivrée
+// qu'après le succès des 3 facteurs.
 // ============================================================
 
-import { telegramLogin, adminCall } from './api.js?v20260725b';
+import { telegramLogin, adminLoginCall, adminCall } from './api.js?v20260726';
 
 let session = null; // { token, expires_at, name } — en mémoire uniquement, jamais persisté
 
@@ -18,13 +22,33 @@ export function logoutAdmin() {
   session = null;
 }
 
-// Tente une connexion admin en utilisant les données Telegram signées
-// disponibles automatiquement quand l'app tourne dans Telegram.
+// Facteur 1 : identité Telegram. Ne délivre plus de session admin —
+// seulement un "challenge" de courte durée prouvant que ce Telegram ID
+// vient d'être vérifié, à utiliser pour les Facteurs 2 et 3.
 export async function tryAdminLogin(tg) {
   if (!tg || !tg.initData) {
     throw new Error('not_in_telegram');
   }
-  const result = await telegramLogin(tg.initData);
+  return await telegramLogin(tg.initData); // { challenge_token, expires_at, requires_admin_login }
+}
+
+// Facteur 2 : email + mot de passe. Retourne soit un besoin
+// d'enrôlement TOTP (première connexion), soit un challenge TOTP
+// classique (connexions suivantes) — jamais directement une session.
+export async function adminLoginStart(challengeToken, email, password) {
+  return await adminLoginCall({ action: 'start', challenge_token: challengeToken, email, password });
+}
+
+// Facteur 3a : confirme le tout premier enrôlement TOTP -> session admin
+export async function adminVerifyEnrollment(challengeToken, accessToken, factorId, code) {
+  const result = await adminLoginCall({ action: 'verify_enrollment', challenge_token: challengeToken, access_token: accessToken, factor_id: factorId, code });
+  session = result;
+  return result;
+}
+
+// Facteur 3b : vérifie un code TOTP classique -> session admin
+export async function adminVerifyMfa(challengeToken, accessToken, factorId, mfaChallengeId, code) {
+  const result = await adminLoginCall({ action: 'verify_mfa', challenge_token: challengeToken, access_token: accessToken, factor_id: factorId, mfa_challenge_id: mfaChallengeId, code });
   session = result;
   return result;
 }

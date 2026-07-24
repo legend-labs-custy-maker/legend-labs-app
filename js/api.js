@@ -3,7 +3,7 @@
 // + appels aux Edge Functions (authentification et écritures admin).
 // ============================================================
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY, TELEGRAM_AUTH_URL, ADMIN_API_URL, VALIDATE_PROMO_URL } from './config.js?v20260725b';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, TELEGRAM_AUTH_URL, ADMIN_API_URL, VALIDATE_PROMO_URL, ADMIN_LOGIN_URL } from './config.js?v20260726';
 
 const REST = `${SUPABASE_URL}/rest/v1`;
 
@@ -96,6 +96,19 @@ export async function adminCall(sessionToken, payload) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'admin_call_failed');
+  return data;
+}
+
+// Facteurs 2 (email + mot de passe) et 3 (TOTP) de la connexion admin —
+// voir js/admin.js pour le détail du déroulé.
+export async function adminLoginCall(payload) {
+  const res = await fetch(ADMIN_LOGIN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'admin_login_failed');
   return data;
 }
 
